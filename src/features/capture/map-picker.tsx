@@ -19,6 +19,7 @@ export type MapPickerProps = {
 // Monas, Jakarta: a neutral starting point when nothing better is known.
 const FALLBACK = { lat: -6.1754, lng: 106.8272 };
 const ZOOMED = { latitudeDelta: 0.004, longitudeDelta: 0.004 };
+const PIN_SIZE = 48;
 
 /** Drag the map under a fixed centre pin; the centre is the chosen point. */
 export function MapPicker({ initial, onConfirm }: MapPickerProps) {
@@ -44,19 +45,21 @@ export function MapPicker({ initial, onConfirm }: MapPickerProps) {
 
   return (
     <View style={styles.flex}>
-      <MapView
-        ref={map}
-        style={styles.flex}
-        initialRegion={{
-          latitude: start.lat,
-          longitude: start.lng,
-          ...(initial ? ZOOMED : { latitudeDelta: 0.08, longitudeDelta: 0.08 }),
-        }}
-        showsUserLocation
-        onRegionChangeComplete={(r: Region) => setCenter({ lat: r.latitude, lng: r.longitude })}
-      />
-      <View pointerEvents="none" style={styles.pinWrap}>
-        <ThemedText style={styles.pin}>📍</ThemedText>
+      <View style={styles.flex}>
+        <MapView
+          ref={map}
+          style={styles.flex}
+          initialRegion={{
+            latitude: start.lat,
+            longitude: start.lng,
+            ...(initial ? ZOOMED : { latitudeDelta: 0.08, longitudeDelta: 0.08 }),
+          }}
+          showsUserLocation
+          onRegionChangeComplete={(r: Region) => setCenter({ lat: r.latitude, lng: r.longitude })}
+        />
+        <View pointerEvents="none" style={styles.pinWrap}>
+          <ThemedText style={styles.pin}>📍</ThemedText>
+        </View>
       </View>
       <View
         style={[
@@ -78,9 +81,9 @@ export function MapPicker({ initial, onConfirm }: MapPickerProps) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  // The pin's tip (bottom of the emoji) sits on the map centre.
-  pinWrap: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', paddingBottom: 150 },
-  pin: { fontSize: 40, lineHeight: 48 },
+  // Padding by the pin's own height puts its tip (bottom of the emoji) on the map centre.
+  pinWrap: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', paddingBottom: PIN_SIZE },
+  pin: { fontSize: 40, lineHeight: PIN_SIZE },
   panel: { padding: Spacing.three, gap: Spacing.two },
   row: { flexDirection: 'row', gap: Spacing.two },
 });

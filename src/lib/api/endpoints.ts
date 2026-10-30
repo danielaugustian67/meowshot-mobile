@@ -1,5 +1,6 @@
 // One typed function per backend route (see mewshot-be README "Endpoint").
 
+import { File as FsFile } from 'expo-file-system';
 import { Platform } from 'react-native';
 
 import { request } from './client';
@@ -51,8 +52,8 @@ async function photoForm(file: UploadFile, fields: Record<string, string | numbe
     // Browsers need a real Blob; picker/manipulator URIs on web are blob: or data: URLs.
     form.append('photo', await (await fetch(file.uri)).blob(), name);
   } else {
-    // React Native's FormData accepts {uri, name, type} for files.
-    form.append('photo', { uri: file.uri, name, type: file.type ?? 'image/jpeg' } as unknown as Blob);
+    // The global fetch is expo/fetch, which reads file parts through bytes() and rejects RN's {uri} parts.
+    form.append('photo', new FsFile(file.uri) as unknown as Blob, name);
   }
   for (const [k, v] of Object.entries(fields)) {
     if (v !== undefined) form.append(k, String(v));
