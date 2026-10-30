@@ -2,10 +2,11 @@ import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { REACTIONS, type Post, type User } from '@/lib/api/types';
+import { REACTIONS, type Post } from '@/lib/api/types';
 import { catName, daysAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 
@@ -25,7 +26,7 @@ export function PostCard({ post }: { post: Post }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Avatar user={post.author} />
+        <Avatar user={post.author} size={AVATAR} />
         <View style={styles.headerText}>
           <ThemedText type="smallBold" numberOfLines={1}>
             @{post.author.username}
@@ -96,24 +97,11 @@ export function PostCard({ post }: { post: Post }) {
   );
 }
 
-function Avatar({ user }: { user: User }) {
-  const theme = useTheme();
-  if (user.avatar_url) {
-    return <Image source={{ uri: user.avatar_url, cacheKey: `avatar-${user.id}` }} style={styles.avatar} />;
-  }
-  return (
-    <View style={[styles.avatar, styles.avatarEmpty, { backgroundColor: theme.backgroundElement }]}>
-      <ThemedText type="smallBold">{user.username[0]?.toUpperCase()}</ThemedText>
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   card: { gap: Spacing.two },
   header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.three },
   headerText: { flex: 1 },
-  avatar: { width: AVATAR, height: AVATAR, borderRadius: AVATAR / 2 },
-  avatarEmpty: { alignItems: 'center', justifyContent: 'center' },
   photo: { width: '100%' },
   body: { gap: Spacing.one, paddingHorizontal: Spacing.three },
   stats: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.one },

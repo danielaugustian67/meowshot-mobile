@@ -28,6 +28,7 @@ export default function ProfileLayout() {
           ),
         }}
       />
+      <Stack.Screen name="friends" options={{ title: t.friends.title }} />
       <Stack.Screen name="settings" options={{ title: t.settings.title }} />
       <Stack.Screen name="edit" options={{ title: t.settings.editProfile }} />
       <Stack.Screen name="password" options={{ title: t.settings.changePassword }} />

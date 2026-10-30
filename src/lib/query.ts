@@ -33,5 +33,14 @@ export const queryKeys = {
   cats: ['cats'] as const,
   catList: ['cats', 'list'] as const,
   nearbyCats: (lat: number, lng: number) => ['cats', 'nearby', lat, lng] as const,
+  /** Prefix for every post list; invalidate it when friendships change, since the friends feed does. */
+  postsAll: ['posts'] as const,
   posts: (scope: FeedScope) => ['posts', scope] as const,
+  /** Prefix for the friend list and requests; invalidate it after any friend action. */
+  friends: ['friends'] as const,
+  friendList: ['friends', 'list'] as const,
+  friendRequests: (direction: 'incoming' | 'outgoing') => ['friends', 'requests', direction] as const,
+  /** Search results carry each user's relationship, so they go stale after friend actions too. */
+  userSearchAll: ['users', 'search'] as const,
+  userSearch: (q: string) => ['users', 'search', q] as const,
 };
