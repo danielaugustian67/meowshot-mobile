@@ -56,8 +56,11 @@ const id = {
     comments: (n: number) => `${n} komentar`,
     photoAlt: (name: string) => `Foto ${name}`,
   },
-  placeholder: {
-    cats: 'Koleksi kucingmu',
+  cats: {
+    emptyTitle: 'Belum ada kucing',
+    emptyBody: 'Foto kucing pertamamu di tab Foto.',
+    photos: (n: number) => `${n} foto`,
+    favorite: 'Favorit',
   },
   capture: {
     cameraTitle: 'Kamera',
@@ -216,8 +219,11 @@ const en: Strings = {
     comments: (n: number) => (n === 1 ? '1 comment' : `${n} comments`),
     photoAlt: (name: string) => `Photo of ${name}`,
   },
-  placeholder: {
-    cats: 'Your cat collection',
+  cats: {
+    emptyTitle: 'No cats yet',
+    emptyBody: 'Take your first cat photo in the Photo tab.',
+    photos: (n: number) => (n === 1 ? '1 photo' : `${n} photos`),
+    favorite: 'Favorite',
   },
   capture: {
     cameraTitle: 'Camera',
