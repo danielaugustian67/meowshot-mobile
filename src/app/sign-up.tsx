@@ -7,12 +7,14 @@ import { ApiError } from '@/lib/api/client';
 import { authApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useSession } from '@/lib/auth/session';
+import { useT } from '@/lib/i18n';
 
 // Same rule as the server (mewshot-be auth_handlers.go usernameRe).
 const USERNAME_RE = /^[a-z0-9_.]{3,30}$/;
 
 export default function SignUpScreen() {
   const { signIn } = useSession();
+  const t = useT();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -25,11 +27,11 @@ export default function SignUpScreen() {
   async function submit() {
     const name = username.trim().toLowerCase();
     if (!USERNAME_RE.test(name)) {
-      setError('Username 3–30 karakter.');
+      setError(t.auth.usernameInvalid);
       return;
     }
     if (password.length < 8) {
-      setError('Password minimal 8 karakter.');
+      setError(t.common.passwordTooShort);
       return;
     }
     setError(null);
@@ -52,7 +54,7 @@ export default function SignUpScreen() {
   return (
     <FormScreen>
       <TextField
-        label="Email"
+        label={t.common.email}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -62,30 +64,30 @@ export default function SignUpScreen() {
         keyboardType="email-address"
       />
       <TextField
-        label="Username"
+        label={t.common.username}
         value={username}
         onChangeText={(v) => setUsername(v.toLowerCase())}
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="username-new"
         textContentType="username"
-        hint="Huruf kecil, angka, titik, _"
+        hint={t.auth.usernameHint}
       />
       <TextField
-        label="Password"
+        label={t.common.password}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         autoComplete="new-password"
         textContentType="newPassword"
-        hint="Minimal 8 karakter."
+        hint={t.common.passwordHint}
       />
       {needsInvite ? (
-        <TextField label="Kode undangan" value={invite} onChangeText={setInvite} autoCapitalize="none" />
+        <TextField label={t.auth.invite} value={invite} onChangeText={setInvite} autoCapitalize="none" />
       ) : null}
       <FormError message={error} />
       <Button
-        title="Buat akun"
+        title={t.auth.createAccount}
         onPress={submit}
         loading={busy}
         disabled={!email.trim() || !username.trim() || !password}

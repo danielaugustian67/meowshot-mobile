@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { setDraft } from '@/features/capture/draft';
 import { catName } from '@/lib/format';
+import { useT } from '@/lib/i18n';
 
 export default function CaptureDoneScreen() {
   const { name, isNew } = useLocalSearchParams<{ catId: string; name?: string; isNew: string }>();
+  const t = useT();
 
   // The draft is cleared here rather than in review, which would redirect while it is still on screen.
   useEffect(() => setDraft(null), []);
@@ -23,12 +25,12 @@ export default function CaptureDoneScreen() {
       <View style={styles.hero}>
         <HeroIcon />
         <ThemedText type="smallBold" style={styles.center}>
-          {isNew === '1' ? 'Kucing baru tersimpan' : `Foto masuk ke ${catName(name)}`}
+          {isNew === '1' ? t.capture.newCatSaved : t.capture.savedTo(catName(name))}
         </ThemedText>
       </View>
-      <Button title="Foto lagi" onPress={() => router.dismissTo('/capture')} />
+      <Button title={t.capture.again} onPress={() => router.dismissTo('/capture')} />
       <Button
-        title="Lihat Kucingku"
+        title={t.capture.viewCats}
         variant="secondary"
         onPress={() => {
           router.dismissTo('/capture');

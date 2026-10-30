@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { Cat } from '@/lib/api/types';
+import { useT } from '@/lib/i18n';
 import { catName, daysAgo, distance } from '@/lib/format';
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 /** One choice in "simpan ke": a new cat, or an existing cat seen nearby. */
 export function CatOption(props: Props) {
   const theme = useTheme();
+  const t = useT();
   const cover = props.kind === 'cat' ? props.cat.cover : null;
   return (
     <Pressable
@@ -42,7 +44,7 @@ export function CatOption(props: Props) {
       <View style={styles.text}>
         {props.kind === 'new' ? (
           <>
-            <ThemedText type="smallBold">Kucing baru</ThemedText>
+            <ThemedText type="smallBold">{t.capture.newCat}</ThemedText>
           </>
         ) : (
           <>

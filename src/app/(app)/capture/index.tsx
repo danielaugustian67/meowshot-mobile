@@ -17,6 +17,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { DraftLocation } from '@/features/capture/draft';
 import { currentLocation } from '@/features/capture/media';
 import { pickFromSystemLibrary, startDraft } from '@/features/capture/prepare';
+import { useT } from '@/lib/i18n';
 
 const CAMERA: SymbolViewProps['name'] = { ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' };
 
@@ -33,6 +34,7 @@ async function latestPhoto(): Promise<string | null> {
 
 export default function CameraScreen() {
   const camera = useRef<CameraView>(null);
+  const t = useT();
   const locating = useRef<Promise<DraftLocation | null> | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [focused, setFocused] = useState(false);
@@ -71,7 +73,7 @@ export default function CameraScreen() {
       const picture = await camera.current.takePictureAsync({ quality: 1 });
       await startDraft(picture, 'camera', await (locating.current ?? currentLocation()), null);
     } catch {
-      setError('Foto gagal diambil.');
+      setError(t.capture.shootFailed);
     } finally {
       setBusy(false);
     }
@@ -86,7 +88,7 @@ export default function CameraScreen() {
     try {
       await pickFromSystemLibrary();
     } catch {
-      setError('Foto tidak bisa dibuka.');
+      setError(t.common.photoOpenFailed);
     }
   }
 
@@ -112,7 +114,7 @@ export default function CameraScreen() {
       )}
       {unavailable && (
         <View style={styles.center}>
-          <Text style={styles.message}>Kamera tidak tersedia.</Text>
+          <Text style={styles.message}>{t.capture.cameraUnavailable}</Text>
         </View>
       )}
 
@@ -120,7 +122,7 @@ export default function CameraScreen() {
         <View style={styles.topBar}>
           <RoundButton
             icon={flash === 'on' ? { ios: 'bolt.fill', android: 'flash_on', web: 'flash_on' } : { ios: 'bolt.slash.fill', android: 'flash_off', web: 'flash_off' }}
-            label={flash === 'on' ? 'Matikan flash' : 'Nyalakan flash'}
+            label={flash === 'on' ? t.capture.flashOff : t.capture.flashOn}
             onPress={() => setFlash(flash === 'on' ? 'off' : 'on')}
           />
         </View>
@@ -128,7 +130,7 @@ export default function CameraScreen() {
         <View style={styles.bottom}>
           {error && <Text style={styles.message}>{error}</Text>}
           <View style={styles.controls}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Galeri" onPress={openGallery} style={styles.thumb}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t.capture.galleryTitle} onPress={openGallery} style={styles.thumb}>
               {thumb ? (
                 <Image source={{ uri: thumb }} style={StyleSheet.absoluteFill} contentFit="cover" />
               ) : (
@@ -137,7 +139,7 @@ export default function CameraScreen() {
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Ambil foto"
+              accessibilityLabel={t.capture.takePhoto}
               disabled={!ready || busy}
               onPress={shoot}
               style={[styles.shutter, { opacity: !ready || busy ? 0.5 : 1 }]}>
@@ -145,7 +147,7 @@ export default function CameraScreen() {
             </Pressable>
             <RoundButton
               icon={{ ios: 'arrow.triangle.2.circlepath', android: 'flip_camera_ios', web: 'flip_camera_ios' }}
-              label="Balik kamera"
+              label={t.capture.flip}
               onPress={() => setFacing(facing === 'back' ? 'front' : 'back')}
             />
           </View>
@@ -178,15 +180,16 @@ function CameraPermission({
   onGallery: () => void;
 }) {
   const theme = useTheme();
+  const t = useT();
   return (
     <SafeAreaView style={[styles.permission, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
       <PawPattern />
       <View style={styles.hero}>
         <HeroIcon name={CAMERA} />
-        <ThemedText type="smallBold">Izinkan kamera</ThemedText>
+        <ThemedText type="smallBold">{t.capture.allowCamera}</ThemedText>
       </View>
-      <Button title={canAsk ? 'Izinkan' : 'Buka Pengaturan'} onPress={canAsk ? onAllow : () => Linking.openSettings()} />
-      <Button title="Dari galeri" variant="secondary" onPress={onGallery} />
+      <Button title={canAsk ? t.common.allow : t.common.openSettings} onPress={canAsk ? onAllow : () => Linking.openSettings()} />
+      <Button title={t.capture.fromGallery} variant="secondary" onPress={onGallery} />
     </SafeAreaView>
   );
 }

@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useT } from '@/lib/i18n';
 
 import { currentLocation } from './media';
 
@@ -24,6 +25,7 @@ const PIN_SIZE = 48;
 /** Drag the map under a fixed centre pin; the centre is the chosen point. */
 export function MapPicker({ initial, onConfirm }: MapPickerProps) {
   const theme = useTheme();
+  const t = useT();
   const insets = useSafeAreaInsets();
   const map = useRef<MapView>(null);
   const start = initial ?? FALLBACK;
@@ -37,7 +39,7 @@ export function MapPicker({ initial, onConfirm }: MapPickerProps) {
     const fix = await currentLocation();
     setLocating(false);
     if (!fix) {
-      setError('Lokasi tidak tersedia.');
+      setError(t.common.locationUnavailable);
       return;
     }
     map.current?.animateToRegion({ latitude: fix.lat, longitude: fix.lng, ...ZOOMED }, 400);
@@ -67,12 +69,12 @@ export function MapPicker({ initial, onConfirm }: MapPickerProps) {
           { backgroundColor: theme.background, paddingBottom: insets.bottom + Spacing.three },
         ]}>
         <ThemedText type="small" themeColor="textSecondary">
-          Geser peta ke tempat kucingnya.
+          {t.capture.mapHint}
         </ThemedText>
         <FormError message={error} />
         <View style={styles.row}>
-          <Button title="Lokasiku" variant="secondary" onPress={goToMe} loading={locating} />
-          <Button title="Pilih" style={styles.flex} onPress={() => onConfirm(center)} />
+          <Button title={t.common.myLocation} variant="secondary" onPress={goToMe} loading={locating} />
+          <Button title={t.capture.choose} style={styles.flex} onPress={() => onConfirm(center)} />
         </View>
       </View>
     </View>

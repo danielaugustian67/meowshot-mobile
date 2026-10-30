@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
 import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
@@ -9,23 +9,13 @@ import { FormError } from '@/components/form-screen';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api/errors';
-import { useMe, useSession } from '@/lib/auth/session';
+import { useMe } from '@/lib/auth/session';
+import { useT } from '@/lib/i18n';
 
 export default function ProfileScreen() {
   const theme = useTheme();
-  const { signOut } = useSession();
+  const t = useT();
   const { data: me, error, isPending, refetch, isRefetching } = useMe();
-
-  function confirmSignOut() {
-    if (Platform.OS === 'web') {
-      signOut();
-      return;
-    }
-    Alert.alert('Keluar?', undefined, [
-      { text: 'Batal', style: 'cancel' },
-      { text: 'Keluar', style: 'destructive', onPress: signOut },
-    ]);
-  }
 
   if (isPending) {
     return (
@@ -55,16 +45,15 @@ export default function ProfileScreen() {
           <ThemedText type="subtitle">@{me.username}</ThemedText>
           {me.bio ? <ThemedText style={styles.centerText}>{me.bio}</ThemedText> : null}
           <ThemedText type="small" themeColor="textSecondary">
-            {me.email} · {me.cat_count} kucing
+            {me.email} · {t.profile.catCount(me.cat_count)}
           </ThemedText>
         </View>
       ) : (
         <View style={styles.header}>
           <FormError message={errorMessage(error)} />
-          <Button title="Coba lagi" variant="secondary" onPress={() => refetch()} loading={isRefetching} />
+          <Button title={t.common.retry} variant="secondary" onPress={() => refetch()} loading={isRefetching} />
         </View>
       )}
-      <Button title="Keluar" variant="secondary" onPress={confirmSignOut} />
     </ScrollView>
   );
 }
