@@ -10,8 +10,8 @@ export function Avatar({ user, size }: { user: Pick<User, 'id' | 'username' | 'a
   const theme = useTheme();
   const shape = { width: size, height: size, borderRadius: size / 2 };
   if (user.avatar_url) {
-    // Signed URLs change on every fetch; cache by user id so the image is not re-downloaded.
-    return <Image source={{ uri: user.avatar_url, cacheKey: `avatar-${user.id}` }} style={shape} />;
+    // Signed URLs change on every fetch, but the path (the storage key) only changes with a new photo.
+    return <Image source={{ uri: user.avatar_url, cacheKey: user.avatar_url.split('?')[0] }} style={shape} />;
   }
   return (
     <View style={[shape, styles.empty, { backgroundColor: theme.backgroundSelected }]}>

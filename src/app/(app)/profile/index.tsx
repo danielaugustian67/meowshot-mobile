@@ -1,7 +1,7 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -39,19 +39,19 @@ export default function ProfileScreen() {
       <PawPattern inScroll />
       {me ? (
         <View style={styles.header}>
-          {me.avatar_url ? (
-            // Signed URLs change on every fetch; cache by user id so the image is not re-downloaded.
-            <Image source={{ uri: me.avatar_url, cacheKey: `avatar-${me.id}` }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarEmpty, { backgroundColor: theme.backgroundElement }]}>
-              <ThemedText style={styles.avatarLetter}>{me.username[0]?.toUpperCase()}</ThemedText>
-            </View>
-          )}
+          <Avatar user={me} size={96} />
           <ThemedText type="subtitle">@{me.username}</ThemedText>
           {me.bio ? <ThemedText style={styles.centerText}>{me.bio}</ThemedText> : null}
           <ThemedText type="small" themeColor="textSecondary">
             {me.email} · {t.profile.catCount(me.cat_count)}
           </ThemedText>
+          <Button
+            size="small"
+            variant="secondary"
+            title={t.settings.editProfile}
+            onPress={() => router.push('/profile/edit')}
+            style={styles.editButton}
+          />
         </View>
       ) : (
         <View style={styles.header}>
@@ -77,8 +77,6 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { padding: Spacing.four, gap: Spacing.four },
   header: { alignItems: 'center', gap: Spacing.two },
-  avatar: { width: 96, height: 96, borderRadius: 48 },
-  avatarEmpty: { alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { fontSize: 40, lineHeight: 48, fontWeight: 700 },
+  editButton: { marginTop: Spacing.one },
   centerText: { textAlign: 'center' },
 });
