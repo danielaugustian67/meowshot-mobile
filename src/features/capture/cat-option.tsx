@@ -43,16 +43,13 @@ export function CatOption(props: Props) {
         {props.kind === 'new' ? (
           <>
             <ThemedText type="smallBold">Kucing baru</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Belum pernah kufoto
-            </ThemedText>
           </>
         ) : (
           <>
             <ThemedText type="smallBold">{catName(props.cat.name)}</ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              {distance(props.distanceM)} dari sini
-              {props.cat.last_sighting ? ` · terakhir ${daysAgo(props.cat.last_sighting.seen_at)}` : ''}
+              {distance(props.distanceM)}
+              {props.cat.last_sighting ? ` · ${daysAgo(props.cat.last_sighting.seen_at)}` : ''}
             </ThemedText>
           </>
         )}

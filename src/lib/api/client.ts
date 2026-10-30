@@ -116,7 +116,7 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
     // Another request may already have rotated the tokens while this one was in flight.
     const latest = getTokens()?.access;
     const ok = latest && latest !== used ? true : await refreshTokens();
-    if (!ok) throw new ApiError(401, 'unauthorized', 'Sesi berakhir, silakan login lagi');
+    if (!ok) throw new ApiError(401, 'unauthorized', 'Sesi habis. Masuk lagi.');
     res = await send(path, opts, getTokens()!.access);
   }
   if (res.status === 403) {

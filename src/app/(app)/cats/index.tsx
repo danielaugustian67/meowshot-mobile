@@ -1,5 +1,5 @@
 import { Placeholder } from '@/components/placeholder';
 
 export default function CatsScreen() {
-  return <Placeholder emoji="🐈" title="Koleksi kucingmu" body="Grid kucing, pencarian, dan peta sighting." />;
+  return <Placeholder icon={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} title="Koleksi kucingmu" body="Segera hadir." />;
 }

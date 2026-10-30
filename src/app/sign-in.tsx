@@ -36,7 +36,7 @@ export default function SignInScreen() {
       <View style={styles.hero}>
         <ThemedText style={styles.logo}>🐾</ThemedText>
         <ThemedText type="subtitle">Meowshot</ThemedText>
-        <ThemedText themeColor="textSecondary">Koleksi kucing jalanan yang kamu temui.</ThemedText>
+        <ThemedText themeColor="textSecondary">Koleksi kucing jalananmu.</ThemedText>
       </View>
 
       <TextField

@@ -25,7 +25,7 @@ export default function SignUpScreen() {
   async function submit() {
     const name = username.trim().toLowerCase();
     if (!USERNAME_RE.test(name)) {
-      setError('Username 3–30 karakter: huruf kecil, angka, titik, atau garis bawah.');
+      setError('Username 3–30 karakter.');
       return;
     }
     if (password.length < 8) {
@@ -69,7 +69,7 @@ export default function SignUpScreen() {
         autoCorrect={false}
         autoComplete="username-new"
         textContentType="username"
-        hint="Bisa diubah nanti. Huruf kecil, angka, titik, garis bawah."
+        hint="Huruf kecil, angka, titik, _"
       />
       <TextField
         label="Password"

@@ -21,7 +21,7 @@ export default function ProfileScreen() {
       signOut();
       return;
     }
-    Alert.alert('Keluar dari Meowshot?', undefined, [
+    Alert.alert('Keluar?', undefined, [
       { text: 'Batal', style: 'cancel' },
       { text: 'Keluar', style: 'destructive', onPress: signOut },
     ]);

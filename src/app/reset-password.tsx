@@ -25,7 +25,7 @@ export default function ResetPasswordScreen() {
     setBusy(true);
     try {
       await authApi.resetPassword({ email, code: code.trim(), new_password: password });
-      Alert.alert('Password diganti', 'Silakan masuk dengan password barumu.');
+      Alert.alert('Password diganti');
       router.dismissTo('/sign-in');
     } catch (e) {
       setError(errorMessage(e));
@@ -52,7 +52,7 @@ export default function ResetPasswordScreen() {
         secureTextEntry
         autoComplete="new-password"
         textContentType="newPassword"
-        hint="Minimal 8 karakter. Semua sesi lain akan keluar."
+        hint="Minimal 8 karakter."
       />
       <FormError message={error} />
       <Button title="Simpan password" onPress={submit} loading={busy} disabled={code.trim().length !== 6 || !password} />

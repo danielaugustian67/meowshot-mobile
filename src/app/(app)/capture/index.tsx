@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
+import { HeroIcon } from '@/components/hero-icon';
 import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
@@ -49,7 +50,7 @@ export default function CaptureScreen() {
         locating = (await ensureLocationPermission()) ? currentLocation() : Promise.resolve(null);
         const cam = await ImagePicker.requestCameraPermissionsAsync();
         if (!cam.granted) {
-          setError('Izin kamera ditolak. Aktifkan di Pengaturan untuk memotret kucing.');
+          setError('Izinkan kamera di Pengaturan.');
           return;
         }
       }
@@ -57,7 +58,7 @@ export default function CaptureScreen() {
       if (res.canceled || !res.assets?.length) return;
       await prepare(res.assets[0], 'camera', locating ?? currentLocation());
     } catch {
-      setError('Kamera tidak bisa dibuka di perangkat ini. Coba pilih dari galeri.');
+      setError('Kamera tidak bisa dibuka.');
     } finally {
       setBusy(null);
     }
@@ -72,7 +73,7 @@ export default function CaptureScreen() {
       // A gallery photo may be old, so the current position is not assumed to be where it was taken.
       await prepare(res.assets[0], 'library', null);
     } catch {
-      setError('Foto tidak bisa dibuka. Coba foto lain.');
+      setError('Foto tidak bisa dibuka.');
     } finally {
       setBusy(null);
     }
@@ -85,18 +86,12 @@ export default function CaptureScreen() {
       contentContainerStyle={styles.content}>
       <PawPattern inScroll />
       <View style={styles.hero}>
-        <ThemedText style={styles.emoji}>📸</ThemedText>
-        <ThemedText type="smallBold" style={styles.center}>
-          Ketemu kucing? Foto dulu, detailnya nanti.
-        </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-          Lokasi diambil otomatis dari foto atau GPS. Kamu bisa menyimpannya sebagai kucing baru atau menambahkannya ke
-          kucing yang sudah ada.
-        </ThemedText>
+        <HeroIcon />
+        <ThemedText type="smallBold">Ketemu kucing?</ThemedText>
       </View>
       <Button title="Ambil foto" onPress={fromCamera} loading={busy === 'camera'} disabled={busy !== null} />
       <Button
-        title="Pilih dari galeri"
+        title="Dari galeri"
         variant="secondary"
         onPress={fromLibrary}
         loading={busy === 'library'}
@@ -109,7 +104,5 @@ export default function CaptureScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: Spacing.four, gap: Spacing.three },
-  hero: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.five },
-  emoji: { fontSize: 64, lineHeight: 76 },
-  center: { textAlign: 'center' },
+  hero: { alignItems: 'center', gap: Spacing.three, paddingVertical: Spacing.five },
 });

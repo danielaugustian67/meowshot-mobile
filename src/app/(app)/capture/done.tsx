@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { HeroIcon } from '@/components/hero-icon';
 import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -20,17 +21,12 @@ export default function CaptureDoneScreen() {
     <ThemedView style={styles.container}>
       <PawPattern />
       <View style={styles.hero}>
-        <ThemedText style={styles.emoji}>🐾</ThemedText>
+        <HeroIcon />
         <ThemedText type="smallBold" style={styles.center}>
-          {isNew === '1' ? 'Kucing baru tersimpan!' : `Foto ditambahkan ke ${catName(name)}`}
-        </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-          {isNew === '1' && !name
-            ? 'Belum bernama. Kamu bisa memberinya nama dari tab Kucingku.'
-            : 'Sighting baru sudah tercatat.'}
+          {isNew === '1' ? 'Kucing baru tersimpan' : `Foto masuk ke ${catName(name)}`}
         </ThemedText>
       </View>
-      <Button title="Foto kucing lagi" onPress={() => router.dismissTo('/capture')} />
+      <Button title="Foto lagi" onPress={() => router.dismissTo('/capture')} />
       <Button
         title="Lihat Kucingku"
         variant="secondary"
@@ -45,7 +41,6 @@ export default function CaptureDoneScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: Spacing.four, gap: Spacing.three, justifyContent: 'center' },
-  hero: { alignItems: 'center', gap: Spacing.two, paddingBottom: Spacing.four },
-  emoji: { fontSize: 64, lineHeight: 76 },
+  hero: { alignItems: 'center', gap: Spacing.three, paddingBottom: Spacing.four },
   center: { textAlign: 'center' },
 });
