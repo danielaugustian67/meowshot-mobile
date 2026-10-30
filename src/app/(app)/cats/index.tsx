@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
@@ -21,6 +21,7 @@ export default function CatsScreen() {
   const theme = useTheme();
   const t = useT();
   const [refreshing, setRefreshing] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
   const query = useInfiniteQuery({
     queryKey: queryKeys.catList,
     queryFn: ({ pageParam }) => catsApi.list({ cursor: pageParam, limit: PAGE, sort: 'last_seen' }),
@@ -62,6 +63,20 @@ export default function CatsScreen() {
       keyExtractor={(c) => String(c.id)}
       renderItem={({ item }) => <CatTile cat={item} />}
       numColumns={2}
+      ItemSeparatorComponent={RowGap}
+      onContentSizeChange={(_, h) => setContentHeight(h)}
+      ListHeaderComponent={
+        // The empty state draws its own pattern.
+        cats.length ? (
+          // A zero-height header whose overflow spans the whole list, so the paws scroll with the cats.
+          // It cannot sit in front of the FlatList: iOS needs the scroll view first for the large title.
+          <View style={styles.patternAnchor}>
+            <View style={[styles.patternBox, { height: contentHeight }]}>
+              <PawPattern inScroll />
+            </View>
+          </View>
+        ) : undefined
+      }
       contentInsetAdjustmentBehavior="automatic"
       style={{ backgroundColor: theme.background }}
       contentContainerStyle={cats.length ? styles.content : styles.empty}
@@ -82,11 +97,19 @@ export default function CatsScreen() {
   );
 }
 
+function RowGap() {
+  return <View style={styles.rowGap} />;
+}
+
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   error: { gap: Spacing.three, padding: Spacing.four },
   // Tiles carry half the gutter on each side; this adds the other half at the screen edges.
-  content: { paddingVertical: Spacing.three, paddingHorizontal: Spacing.three / 2, gap: Spacing.four },
+  content: { paddingVertical: Spacing.three, paddingHorizontal: Spacing.three / 2 },
+  rowGap: { height: Spacing.four },
+  patternAnchor: { height: 0 },
+  // Back out the content padding so the paws reach the screen edges.
+  patternBox: { position: 'absolute', top: -Spacing.three, left: -Spacing.three / 2, right: -Spacing.three / 2 },
   empty: { flexGrow: 1 },
   footer: { paddingVertical: Spacing.four },
 });
