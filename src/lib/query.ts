@@ -31,6 +31,7 @@ export const queryKeys = {
   me: ['me'] as const,
   /** Prefix for every cat query; invalidate it after anything that adds or changes cats. */
   cats: ['cats'] as const,
+  catList: ['cats', 'list'] as const,
   nearbyCats: (lat: number, lng: number) => ['cats', 'nearby', lat, lng] as const,
   posts: (scope: FeedScope) => ['posts', scope] as const,
 };
