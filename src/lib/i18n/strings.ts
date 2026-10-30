@@ -131,8 +131,13 @@ const id = {
   },
   user: {
     open: (username: string) => `Buka profil @${username}`,
+    posts: 'Post',
+    cats: 'kucing',
+    postsLabel: 'post',
+    friends: 'teman',
     emptyPosts: 'Belum ada post yang bisa kamu lihat.',
-    friendsOnly: 'Post khusus teman muncul setelah kalian berteman.',
+    friendsOnly: 'Post khusus teman tampil setelah berteman',
+    openPost: (name: string) => `Buka post ${name}`,
   },
   settings: {
     title: 'Pengaturan',
@@ -323,8 +328,13 @@ const en: Strings = {
   },
   user: {
     open: (username: string) => `Open @${username}'s profile`,
+    posts: 'Posts',
+    cats: 'cats',
+    postsLabel: 'posts',
+    friends: 'friends',
     emptyPosts: 'No posts you can see yet.',
-    friendsOnly: 'Friends-only posts show up once you are friends.',
+    friendsOnly: 'Friends-only posts show once you are friends',
+    openPost: (name: string) => `Open post of ${name}`,
   },
   settings: {
     title: 'Settings',

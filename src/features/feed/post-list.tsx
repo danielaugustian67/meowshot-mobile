@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState, type ReactElement } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
@@ -9,7 +9,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { postsApi, usersApi } from '@/lib/api/endpoints';
+import { postsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useT } from '@/lib/i18n';
 import { queryKeys, type FeedScope } from '@/lib/query';
@@ -18,27 +18,15 @@ import { PostCard } from './post-card';
 
 const PAGE = 20;
 
-/** A feed scope, or one user's posts (only those the viewer may see). */
-export type PostSource = FeedScope | { username: string };
-
-function load(source: PostSource, cursor: string | null) {
-  const page = { cursor, limit: PAGE };
-  if (typeof source !== 'string') return usersApi.posts(source.username, page);
-  return source === 'friends' ? postsApi.feed(page) : postsApi.explore(page);
-}
-
-/**
- * "friends" is /feed (own and friends' posts); "public" is /explore (everyone's public posts).
- * `header` scrolls with the list, e.g. a profile above that user's posts.
- */
-export function PostList({ source, header }: { source: PostSource; header?: ReactElement }) {
+/** "friends" is /feed (own and friends' posts); "public" is /explore (everyone's public posts). */
+export function PostList({ scope }: { scope: FeedScope }) {
   const theme = useTheme();
   const t = useT();
   const [refreshing, setRefreshing] = useState(false);
-  const byUser = typeof source !== 'string';
   const query = useInfiniteQuery({
-    queryKey: byUser ? queryKeys.userPosts(source.username) : queryKeys.posts(source),
-    queryFn: ({ pageParam }) => load(source, pageParam),
+    queryKey: queryKeys.posts(scope),
+    queryFn: ({ pageParam }) =>
+      (scope === 'friends' ? postsApi.feed : postsApi.explore)({ cursor: pageParam, limit: PAGE }),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.next_cursor,
   });
@@ -75,9 +63,7 @@ export function PostList({ source, header }: { source: PostSource; header?: Reac
     <FlatList
       data={posts}
       keyExtractor={(p) => String(p.id)}
-      // On a profile every post is by that user, so the author does not link back to the same screen.
-      renderItem={({ item }) => <PostCard post={item} linkAuthor={!byUser} />}
-      ListHeaderComponent={header}
+      renderItem={({ item }) => <PostCard post={item} />}
       ItemSeparatorComponent={Separator}
       contentInsetAdjustmentBehavior="automatic"
       style={{ backgroundColor: theme.background }}
@@ -89,13 +75,7 @@ export function PostList({ source, header }: { source: PostSource; header?: Reac
       onEndReachedThreshold={0.5}
       ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator style={styles.footer} /> : undefined}
       ListEmptyComponent={
-        byUser ? (
-          <Placeholder
-            icon={{ ios: 'photo.on.rectangle', android: 'photo_library', web: 'photo_library' }}
-            title={t.feed.emptyTitle}
-            body={t.user.emptyPosts}
-          />
-        ) : source === 'friends' ? (
+        scope === 'friends' ? (
           <Placeholder
             icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }}
             title={t.feed.emptyTitle}

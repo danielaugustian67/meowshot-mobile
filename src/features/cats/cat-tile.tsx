@@ -4,14 +4,12 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Fonts, Spacing } from '@/constants/theme';
+import { Fonts, Pastels, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { Cat } from '@/lib/api/types';
 import { catName, daysAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 
-// Pastel frames that read on both the off-white and the black page.
-const FRAMES = ['#FFB37A', '#F7A8C4', '#8FD6AE', '#9EC2F5', '#F5D46E', '#C5B0F5'];
 // A slight, fixed tilt per cat, like photos stuck on a fridge.
 const TILTS = ['-1.5deg', '1deg', '0deg', '1.5deg', '-1deg'];
 
@@ -20,7 +18,7 @@ export function CatTile({ cat }: { cat: Cat }) {
   const theme = useTheme();
   const t = useT();
   const seen = cat.last_sighting;
-  const frame = FRAMES[cat.id % FRAMES.length];
+  const frame = Pastels[cat.id % Pastels.length];
   const tilt = TILTS[cat.id % TILTS.length];
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   return (
