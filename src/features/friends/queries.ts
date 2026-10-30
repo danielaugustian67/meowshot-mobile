@@ -33,7 +33,7 @@ export function useFriendAction() {
     } finally {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.friends }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.userSearchAll }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.users }),
         queryClient.invalidateQueries({ queryKey: queryKeys.postsAll }),
       ]);
       setBusy(null);

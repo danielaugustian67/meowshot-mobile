@@ -1,10 +1,11 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useOpenProfile } from '@/features/users/open-profile';
 import { useTheme } from '@/hooks/use-theme';
 import { REACTIONS, type Post } from '@/lib/api/types';
 import { catName, daysAgo } from '@/lib/format';
@@ -12,10 +13,11 @@ import { useT } from '@/lib/i18n';
 
 const AVATAR = 36;
 
-/** One post in the feed: author, the cat's first photo, reactions and caption. */
-export function PostCard({ post }: { post: Post }) {
+/** One post in the feed: author, the cat's first photo, reactions and caption. Tapping the author opens their profile. */
+export function PostCard({ post, linkAuthor = true }: { post: Post; linkAuthor?: boolean }) {
   const theme = useTheme();
   const t = useT();
+  const openProfile = useOpenProfile();
   const photo = post.photos[0];
   const name = catName(post.cat.name);
   const place = post.location?.label;
@@ -26,15 +28,22 @@ export function PostCard({ post }: { post: Post }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Avatar user={post.author} size={AVATAR} />
-        <View style={styles.headerText}>
-          <ThemedText type="smallBold" numberOfLines={1}>
-            @{post.author.username}
-          </ThemedText>
-          <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
-            {place ? `${name} · ${place}` : name}
-          </ThemedText>
-        </View>
+        <Pressable
+          accessibilityRole={linkAuthor ? 'link' : undefined}
+          accessibilityLabel={linkAuthor ? t.user.open(post.author.username) : undefined}
+          disabled={!linkAuthor}
+          onPress={() => openProfile(post.author.username)}
+          style={styles.author}>
+          <Avatar user={post.author} size={AVATAR} />
+          <View style={styles.headerText}>
+            <ThemedText type="smallBold" numberOfLines={1}>
+              @{post.author.username}
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
+              {place ? `${name} · ${place}` : name}
+            </ThemedText>
+          </View>
+        </Pressable>
         <SymbolView
           name={
             post.visibility === 'PUBLIC'
@@ -101,6 +110,7 @@ export function PostCard({ post }: { post: Post }) {
 const styles = StyleSheet.create({
   card: { gap: Spacing.two },
   header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.three },
+  author: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   headerText: { flex: 1 },
   photo: { width: '100%' },
   body: { gap: Spacing.one, paddingHorizontal: Spacing.three },
