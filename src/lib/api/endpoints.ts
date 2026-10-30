@@ -9,6 +9,7 @@ import type {
   CaptureResponse,
   Cat,
   CatSort,
+  CollectionCat,
   Comment,
   Friend,
   FriendRequest,
@@ -140,6 +141,9 @@ export const usersApi = {
   profile: (username: string) => request<Profile>(`/users/${encodeURIComponent(username)}`),
   posts: (username: string, q: PageQuery = {}) =>
     request<Page<Post>>(`/users/${encodeURIComponent(username)}/posts`, { query: q }),
+  /** Friends and the owner only; anyone else gets 403. */
+  cats: (username: string, q: PageQuery = {}) =>
+    request<Page<CollectionCat>>(`/users/${encodeURIComponent(username)}/cats`, { query: q }),
 };
 
 export const friendsApi = {

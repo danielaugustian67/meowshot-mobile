@@ -1,20 +1,29 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Fonts, Pastels, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import type { Cat } from '@/lib/api/types';
+import type { CollectionCat, Sighting } from '@/lib/api/types';
 import { catName, daysAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 
 // A slight, fixed tilt per cat, like photos stuck on a fridge.
 const TILTS = ['-1.5deg', '1deg', '0deg', '1.5deg', '-1deg'];
 
-/** One cat in the collection grid, framed like a polaroid: cover, name, when and where it was last seen. */
-export function CatTile({ cat }: { cat: Cat }) {
+/**
+ * One cat in a collection, framed like a polaroid: cover, name and, for your own cats, when and where it
+ * was last seen. `style` replaces the half-row grid sizing, e.g. with a fixed width in a carousel.
+ */
+export function CatTile({
+  cat,
+  style,
+}: {
+  cat: CollectionCat & { last_sighting?: Sighting | null };
+  style?: StyleProp<ViewStyle>;
+}) {
   const theme = useTheme();
   const t = useT();
   const seen = cat.last_sighting;
@@ -22,7 +31,7 @@ export function CatTile({ cat }: { cat: Cat }) {
   const tilt = TILTS[cat.id % TILTS.length];
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   return (
-    <View style={styles.tile}>
+    <View style={[styles.tile, style]}>
       {/* The page colour under the 25% wash, so the paw pattern does not show through the card. */}
       <View
         onLayout={(e) => setSize(e.nativeEvent.layout)}

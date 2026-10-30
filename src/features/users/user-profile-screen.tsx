@@ -11,7 +11,9 @@ import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
+import { SectionTitle } from '@/components/ui/section-title';
 import { Fonts, Pastels, Spacing } from '@/constants/theme';
+import { CatCarousel } from '@/features/cats/cat-carousel';
 import { useFriendAction } from '@/features/friends/queries';
 import { RelationAction } from '@/features/friends/relation-action';
 import { useStackLinks } from '@/hooks/use-stack-links';
@@ -21,9 +23,11 @@ import { errorMessage } from '@/lib/api/errors';
 import type { Post, Profile } from '@/lib/api/types';
 import { catName } from '@/lib/format';
 import { useT } from '@/lib/i18n';
-import { queryKeys } from '@/lib/query';
+import { queryClient, queryKeys } from '@/lib/query';
 
 const PAGE = 30;
+// The carousel shows this many; the count beside the title tells the full size.
+const COLLECTION_LIMIT = 20;
 const COLUMNS = 3;
 
 /** Someone's profile and the posts of theirs you may see: public ones, plus friends-only once you are friends. */
@@ -81,7 +85,11 @@ function PostGrid({ profile, refetchProfile }: { profile: Profile; refetchProfil
   async function refresh() {
     setRefreshing(true);
     // The header's counts and friend button come from the profile query.
-    await Promise.all([posts.refetch(), refetchProfile()]);
+    await Promise.all([
+      posts.refetch(),
+      refetchProfile(),
+      queryClient.invalidateQueries({ queryKey: queryKeys.userCats(profile.username) }),
+    ]);
     setRefreshing(false);
   }
 
@@ -101,6 +109,10 @@ function PostGrid({ profile, refetchProfile }: { profile: Profile; refetchProfil
             </View>
           </View>
           <ProfileHeader profile={profile} />
+          <Collection profile={profile} />
+          <View style={[styles.section, styles.gridTitle]}>
+            <SectionTitle title={t.user.posts} count={profile.post_count} />
+          </View>
         </>
       }
       ListEmptyComponent={
@@ -203,6 +215,32 @@ function ProfileHeader({ profile }: { profile: Profile }) {
   );
 }
 
+/**
+ * Their cats as polaroids, for friends (and for yourself). Hidden when there is nothing to show, and also
+ * when the server has no collection endpoint yet or refuses it, so an older API just leaves it out.
+ */
+function Collection({ profile }: { profile: Profile }) {
+  const t = useT();
+  const { status } = profile.relationship;
+  const allowed = (status === 'friends' || status === 'self') && profile.cat_count > 0;
+  const cats = useQuery({
+    queryKey: queryKeys.userCats(profile.username),
+    queryFn: () => usersApi.cats(profile.username, { limit: COLLECTION_LIMIT }),
+    enabled: allowed,
+  });
+  if (!allowed || cats.isError) return null;
+  return (
+    <View style={styles.section}>
+      <SectionTitle title={t.user.collection} count={profile.cat_count} />
+      {cats.data ? (
+        <CatCarousel cats={cats.data.items} inset={SIDE} />
+      ) : (
+        <ActivityIndicator style={styles.spinner} />
+      )}
+    </View>
+  );
+}
+
 /** One post in the grid: its first photo, cropped square. */
 function PostTile({ post }: { post: Post }) {
   const theme = useTheme();
@@ -249,7 +287,9 @@ const styles = StyleSheet.create({
   patternAnchor: { height: 0 },
   // Back out the content padding so the paws reach the screen edges.
   patternBox: { position: 'absolute', left: -SIDE, right: -SIDE },
-  header: { alignItems: 'center', paddingHorizontal: TILE_GAP, paddingTop: Spacing.two, paddingBottom: Spacing.four },
+  header: { alignItems: 'center', paddingHorizontal: TILE_GAP, paddingTop: Spacing.two, paddingBottom: Spacing.two },
+  section: { paddingHorizontal: TILE_GAP, paddingTop: Spacing.three },
+  gridTitle: { paddingBottom: Spacing.two },
   banner: {
     alignSelf: 'stretch',
     height: BANNER,

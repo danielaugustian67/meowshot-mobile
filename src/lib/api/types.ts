@@ -70,6 +70,9 @@ export type Cat = {
   updated_at: string;
 };
 
+/** A cat as it shows in a friend's collection: no notes or sightings. */
+export type CollectionCat = Pick<Cat, 'id' | 'name' | 'is_favorite' | 'cover' | 'photo_count'>;
+
 export type CatSort = 'last_seen' | 'found' | 'name';
 
 export type NearbyCat = { cat: Cat; distance_m: number };

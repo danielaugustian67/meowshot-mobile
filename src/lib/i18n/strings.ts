@@ -109,6 +109,7 @@ const id = {
     signOut: 'Keluar',
     signOutConfirm: 'Keluar?',
     settings: 'Pengaturan',
+    seeAll: 'Lihat semua',
   },
   friends: {
     title: 'Teman',
@@ -136,7 +137,8 @@ const id = {
     postsLabel: 'post',
     friends: 'teman',
     emptyPosts: 'Belum ada post yang bisa kamu lihat.',
-    friendsOnly: 'Post khusus teman tampil setelah berteman',
+    collection: 'Koleksi',
+    friendsOnly: 'Koleksi dan post khusus teman tampil setelah berteman',
     openPost: (name: string) => `Buka post ${name}`,
   },
   settings: {
@@ -306,6 +308,7 @@ const en: Strings = {
     signOut: 'Sign out',
     signOutConfirm: 'Sign out?',
     settings: 'Settings',
+    seeAll: 'See all',
   },
   friends: {
     title: 'Friends',
@@ -333,7 +336,8 @@ const en: Strings = {
     postsLabel: 'posts',
     friends: 'friends',
     emptyPosts: 'No posts you can see yet.',
-    friendsOnly: 'Friends-only posts show once you are friends',
+    collection: 'Collection',
+    friendsOnly: 'Their collection and friends-only posts show once you are friends',
     openPost: (name: string) => `Open post of ${name}`,
   },
   settings: {

@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -9,25 +8,17 @@ import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { CatTile } from '@/features/cats/cat-tile';
+import { useMyCats } from '@/features/cats/queries';
 import { useTheme } from '@/hooks/use-theme';
-import { catsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useT } from '@/lib/i18n';
-import { queryKeys } from '@/lib/query';
-
-const PAGE = 30;
 
 export default function CatsScreen() {
   const theme = useTheme();
   const t = useT();
   const [refreshing, setRefreshing] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
-  const query = useInfiniteQuery({
-    queryKey: queryKeys.catList,
-    queryFn: ({ pageParam }) => catsApi.list({ cursor: pageParam, limit: PAGE, sort: 'last_seen' }),
-    initialPageParam: null as string | null,
-    getNextPageParam: (last) => last.next_cursor,
-  });
+  const query = useMyCats();
 
   if (query.isPending) {
     return (
