@@ -1,5 +1,5 @@
 import { Placeholder } from '@/components/placeholder';
 
 export default function FeedScreen() {
-  return <Placeholder emoji="🏠" title="Feed teman" body="Post dari teman-teman dan dirimu sendiri akan muncul di sini." />;
+  return <Placeholder icon={{ ios: 'house.fill', android: 'home', web: 'home' }} title="Post teman" body="Segera hadir." />;
 }

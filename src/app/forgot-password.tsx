@@ -29,9 +29,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <FormScreen>
-      <ThemedText themeColor="textSecondary">
-        Masukkan email akunmu. Kalau terdaftar, kami kirim kode 6 digit yang berlaku 15 menit.
-      </ThemedText>
+      <ThemedText themeColor="textSecondary">Kode reset dikirim ke emailmu.</ThemedText>
       <TextField
         label="Email"
         value={email}

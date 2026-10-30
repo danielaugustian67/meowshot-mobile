@@ -23,11 +23,11 @@ const SUGGEST_RADIUS_M = 300; // same radius the server uses for capture suggest
 function describe(loc: DraftLocation) {
   switch (loc.source) {
     case 'exif':
-      return 'Dari data foto';
+      return 'Dari foto';
     case 'manual':
-      return 'Dipilih di peta';
+      return 'Dari peta';
     default:
-      return loc.accuracy ? `GPS perangkat (±${Math.round(loc.accuracy)} m)` : 'GPS perangkat';
+      return loc.accuracy ? `GPS (±${Math.round(loc.accuracy)} m)` : 'GPS';
   }
 }
 
@@ -60,7 +60,7 @@ export default function ReviewScreen() {
     const fix = await currentLocation();
     setLocating(false);
     if (fix) updateDraft({ location: fix });
-    else setError('Lokasi tidak tersedia. Izinkan akses lokasi, atau pilih titiknya di peta.');
+    else setError('Lokasi tidak tersedia.');
   }
 
   async function save() {
@@ -121,9 +121,7 @@ export default function ReviewScreen() {
                 </ThemedText>
               </>
             ) : (
-              <ThemedText themeColor="textSecondary">
-                Foto ini tidak punya data lokasi. Pakai lokasimu sekarang atau pilih di peta.
-              </ThemedText>
+              <ThemedText themeColor="textSecondary">Foto ini tanpa lokasi.</ThemedText>
             )}
             <View style={styles.row}>
               <Button
@@ -142,8 +140,8 @@ export default function ReviewScreen() {
             </View>
           </View>
           <TextField
-            label="Label lokasi (opsional)"
-            placeholder="Depan Indomaret Jl. Melati"
+            label="Tempat (opsional)"
+            placeholder="Depan Indomaret"
             value={label}
             onChangeText={setLabel}
             maxLength={200}
@@ -156,7 +154,7 @@ export default function ReviewScreen() {
           {loc && nearby.isPending ? <ActivityIndicator style={styles.spinner} /> : null}
           {suggestions.length > 0 ? (
             <ThemedText type="small" themeColor="textSecondary">
-              Kucing yang pernah kamu temui di dekat sini. Apakah salah satunya?
+              Atau kucing di dekat sini:
             </ThemedText>
           ) : null}
           {suggestions.map((s) => (
@@ -176,13 +174,12 @@ export default function ReviewScreen() {
               value={name}
               onChangeText={setName}
               maxLength={60}
-              hint="Boleh dikosongkan dan diisi belakangan."
             />
           ) : null}
         </View>
 
         <FormError message={error} />
-        <Button title={chosen === 'new' ? 'Simpan kucing baru' : 'Tambahkan foto'} onPress={save} loading={saving} />
+        <Button title="Simpan" onPress={save} loading={saving} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

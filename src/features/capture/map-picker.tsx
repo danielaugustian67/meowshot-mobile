@@ -37,7 +37,7 @@ export function MapPicker({ initial, onConfirm }: MapPickerProps) {
     const fix = await currentLocation();
     setLocating(false);
     if (!fix) {
-      setError('Lokasi tidak tersedia. Geser peta secara manual.');
+      setError('Lokasi tidak tersedia.');
       return;
     }
     map.current?.animateToRegion({ latitude: fix.lat, longitude: fix.lng, ...ZOOMED }, 400);
@@ -67,12 +67,12 @@ export function MapPicker({ initial, onConfirm }: MapPickerProps) {
           { backgroundColor: theme.background, paddingBottom: insets.bottom + Spacing.three },
         ]}>
         <ThemedText type="small" themeColor="textSecondary">
-          Geser peta sampai pin berada di tempat kamu bertemu kucingnya.
+          Geser peta ke tempat kucingnya.
         </ThemedText>
         <FormError message={error} />
         <View style={styles.row}>
           <Button title="Lokasiku" variant="secondary" onPress={goToMe} loading={locating} />
-          <Button title="Pakai titik ini" style={styles.flex} onPress={() => onConfirm(center)} />
+          <Button title="Pilih" style={styles.flex} onPress={() => onConfirm(center)} />
         </View>
       </View>
     </View>

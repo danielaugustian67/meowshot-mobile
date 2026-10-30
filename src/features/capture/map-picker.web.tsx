@@ -6,9 +6,9 @@ import type { MapPickerProps } from './map-picker';
 export function MapPicker(_: MapPickerProps) {
   return (
     <Placeholder
-      emoji="🗺️"
-      title="Peta belum tersedia di web"
-      body="Pilih lokasi di peta hanya bisa di app iOS/Android. Di web, pakai tombol Lokasiku sekarang."
+      icon={{ web: 'map' }}
+      title="Peta hanya di aplikasi"
+      body="Pakai tombol Lokasiku."
     />
   );
 }
