@@ -24,7 +24,7 @@ export default function FeedScreen() {
     <>
       <Stack.Screen options={{ headerTitle: () => <ScopeSwitch value={scope} onChange={choose} /> }} />
       {/* Keyed so switching scope starts the other list at the top, not at this one's scroll offset. */}
-      <PostList key={scope} scope={scope} />
+      <PostList key={scope} source={scope} />
     </>
   );
 }

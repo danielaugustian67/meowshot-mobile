@@ -40,7 +40,9 @@ export const queryKeys = {
   friends: ['friends'] as const,
   friendList: ['friends', 'list'] as const,
   friendRequests: (direction: 'incoming' | 'outgoing') => ['friends', 'requests', direction] as const,
-  /** Search results carry each user's relationship, so they go stale after friend actions too. */
-  userSearchAll: ['users', 'search'] as const,
+  /** Prefix for search and profiles: both carry each user's relationship, so friend actions make them stale too. */
+  users: ['users'] as const,
   userSearch: (q: string) => ['users', 'search', q] as const,
+  userProfile: (username: string) => ['users', 'profile', username] as const,
+  userPosts: (username: string) => ['posts', 'user', username] as const,
 };

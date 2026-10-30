@@ -104,6 +104,8 @@ const id = {
   profile: {
     title: 'Profil',
     catCount: (n: number) => `${n} kucing`,
+    postCount: (n: number) => `${n} post`,
+    friendCount: (n: number) => `${n} teman`,
     signOut: 'Keluar',
     signOutConfirm: 'Keluar?',
     settings: 'Pengaturan',
@@ -126,6 +128,11 @@ const id = {
     options: (username: string) => `Pilihan untuk @${username}`,
     remove: 'Hapus teman',
     removeConfirm: (username: string) => `Hapus @${username} dari teman?`,
+  },
+  user: {
+    open: (username: string) => `Buka profil @${username}`,
+    emptyPosts: 'Belum ada post yang bisa kamu lihat.',
+    friendsOnly: 'Post khusus teman muncul setelah kalian berteman.',
   },
   settings: {
     title: 'Pengaturan',
@@ -289,6 +296,8 @@ const en: Strings = {
   profile: {
     title: 'Profile',
     catCount: (n: number) => (n === 1 ? '1 cat' : `${n} cats`),
+    postCount: (n: number) => (n === 1 ? '1 post' : `${n} posts`),
+    friendCount: (n: number) => (n === 1 ? '1 friend' : `${n} friends`),
     signOut: 'Sign out',
     signOutConfirm: 'Sign out?',
     settings: 'Settings',
@@ -311,6 +320,11 @@ const en: Strings = {
     options: (username: string) => `Options for @${username}`,
     remove: 'Remove friend',
     removeConfirm: (username: string) => `Remove @${username} from friends?`,
+  },
+  user: {
+    open: (username: string) => `Open @${username}'s profile`,
+    emptyPosts: 'No posts you can see yet.',
+    friendsOnly: 'Friends-only posts show up once you are friends.',
   },
   settings: {
     title: 'Settings',
