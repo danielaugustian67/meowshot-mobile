@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
+import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
@@ -82,6 +83,7 @@ export default function CaptureScreen() {
       contentInsetAdjustmentBehavior="automatic"
       style={{ backgroundColor: theme.background }}
       contentContainerStyle={styles.content}>
+      <PawPattern inScroll />
       <View style={styles.hero}>
         <ThemedText style={styles.emoji}>📸</ThemedText>
         <ThemedText type="smallBold" style={styles.center}>

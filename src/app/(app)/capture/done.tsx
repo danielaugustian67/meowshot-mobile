@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ export default function CaptureDoneScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <PawPattern />
       <View style={styles.hero}>
         <ThemedText style={styles.emoji}>🐾</ThemedText>
         <ThemedText type="smallBold" style={styles.center}>

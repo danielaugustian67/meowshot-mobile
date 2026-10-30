@@ -1,7 +1,8 @@
 import type { PropsWithChildren } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -12,8 +13,9 @@ export function FormScreen({ children }: PropsWithChildren) {
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {children}
+        <ScrollView contentContainerStyle={styles.grow} keyboardShouldPersistTaps="handled">
+          <PawPattern inScroll />
+          <View style={styles.content}>{children}</View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -31,6 +33,7 @@ export function FormError({ message }: { message: string | null }) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  grow: { flexGrow: 1 },
   content: {
     flexGrow: 1,
     gap: Spacing.three,
