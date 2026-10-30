@@ -7,8 +7,11 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { ListCard, ListRow } from '@/components/ui/list';
+import { SectionTitle } from '@/components/ui/section-title';
 import { FormError } from '@/components/form-screen';
 import { Spacing } from '@/constants/theme';
+import { CatCarousel } from '@/features/cats/cat-carousel';
+import { useMyCats } from '@/features/cats/queries';
 import { useFriendRequests, useFriends } from '@/features/friends/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api/errors';
@@ -59,6 +62,7 @@ export default function ProfileScreen() {
           <Button title={t.common.retry} variant="secondary" onPress={() => refetch()} loading={isRefetching} />
         </View>
       )}
+      {me ? <MyCollection count={me.cat_count} /> : null}
       {me ? (
         <ListCard>
           <ListRow
@@ -73,10 +77,38 @@ export default function ProfileScreen() {
   );
 }
 
+/** Your Kucingku polaroids in a sideways row, with a link to the full collection. */
+function MyCollection({ count }: { count: number }) {
+  const t = useT();
+  const cats = useMyCats();
+  const items = cats.data?.pages.flatMap((p) => p.items) ?? [];
+  if (cats.isError) return null;
+  return (
+    <View>
+      <SectionTitle
+        title={t.user.collection}
+        count={count}
+        action={count > 0 ? { label: t.profile.seeAll, onPress: () => router.navigate('/cats') } : undefined}
+      />
+      {cats.isPending ? (
+        <ActivityIndicator style={styles.spinner} />
+      ) : items.length ? (
+        <CatCarousel cats={items} inset={Spacing.four} />
+      ) : (
+        <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
+          {t.cats.emptyBody}
+        </ThemedText>
+      )}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { padding: Spacing.four, gap: Spacing.four },
   header: { alignItems: 'center', gap: Spacing.two },
   editButton: { marginTop: Spacing.one },
   centerText: { textAlign: 'center' },
+  spinner: { paddingVertical: Spacing.four },
+  empty: { paddingTop: Spacing.two },
 });

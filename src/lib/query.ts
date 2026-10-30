@@ -45,5 +45,7 @@ export const queryKeys = {
   userSearch: (q: string) => ['users', 'search', q] as const,
   userProfile: (username: string) => ['users', 'profile', username] as const,
   userPosts: (username: string) => ['posts', 'user', username] as const,
+  // Under `users`, so a friend action refetches it: becoming friends opens the collection.
+  userCats: (username: string) => ['users', 'cats', username] as const,
   post: (id: number) => ['posts', 'detail', id] as const,
 };
