@@ -3,7 +3,7 @@ import { NativeTabs } from 'expo-router/native-tabs';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/lib/i18n';
 
-// Android allows at most five native tabs; keep it at five.
+// Android allows at most five native tabs.
 export default function AppTabs() {
   const theme = useTheme();
   const t = useT();
@@ -16,10 +16,6 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="(feed)">
         <NativeTabs.Trigger.Label>{t.tabs.feed}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>{t.tabs.explore}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="safari" md="explore" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="capture">
         <NativeTabs.Trigger.Label>{t.tabs.capture}</NativeTabs.Trigger.Label>

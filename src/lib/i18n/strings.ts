@@ -21,7 +21,6 @@ const id = {
   },
   tabs: {
     feed: 'Feed',
-    explore: 'Explore',
     capture: 'Foto',
     cats: 'Kucingku',
     profile: 'Profil',
@@ -47,6 +46,10 @@ const id = {
     newPassword: 'Password baru',
     savePassword: 'Simpan password',
     passwordChanged: 'Password diganti',
+  },
+  feed: {
+    friends: 'Teman',
+    public: 'Publik',
   },
   placeholder: {
     feed: 'Post teman',
@@ -175,7 +178,6 @@ const en: Strings = {
   },
   tabs: {
     feed: 'Feed',
-    explore: 'Explore',
     capture: 'Photo',
     cats: 'My cats',
     profile: 'Profile',
@@ -201,6 +203,10 @@ const en: Strings = {
     newPassword: 'New password',
     savePassword: 'Save password',
     passwordChanged: 'Password changed',
+  },
+  feed: {
+    friends: 'Friends',
+    public: 'Public',
   },
   placeholder: {
     feed: "Friends' posts",
