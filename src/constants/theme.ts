@@ -33,7 +33,8 @@ export const Colors = {
     tint: '#FF8B3E',
     onTint: '#1A0D00',
     danger: '#FF6369',
-    pattern: '#1A1511',
+    /** Brighter than the light-mode ratio suggests: faint marks on pure black disappear on a dim phone screen. */
+    pattern: '#2E241B',
   },
 } as const;
 
