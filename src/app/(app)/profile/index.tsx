@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
+import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ export default function ProfileScreen() {
   if (isPending) {
     return (
       <ThemedView style={styles.center}>
+        <PawPattern />
         <ActivityIndicator />
       </ThemedView>
     );
@@ -39,6 +41,7 @@ export default function ProfileScreen() {
       contentInsetAdjustmentBehavior="automatic"
       style={{ backgroundColor: theme.background }}
       contentContainerStyle={styles.content}>
+      <PawPattern inScroll />
       {me ? (
         <View style={styles.header}>
           {me.avatar_url ? (

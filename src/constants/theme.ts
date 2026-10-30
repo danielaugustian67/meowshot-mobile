@@ -10,7 +10,8 @@ import { Platform } from 'react-native';
 export const Colors = {
   light: {
     text: '#000000',
-    background: '#ffffff',
+    /** Warm off-white so the paw pattern reads as part of the page. */
+    background: '#FFFBF7',
     backgroundElement: '#F0F0F3',
     backgroundSelected: '#E0E1E6',
     textSecondary: '#60646C',
@@ -19,6 +20,8 @@ export const Colors = {
     tint: '#E8620C',
     onTint: '#ffffff',
     danger: '#CE2C31',
+    /** Paw prints drawn behind screens (PawPattern). */
+    pattern: '#F6EBE0',
   },
   dark: {
     text: '#ffffff',
@@ -30,6 +33,7 @@ export const Colors = {
     tint: '#FF8B3E',
     onTint: '#1A0D00',
     danger: '#FF6369',
+    pattern: '#1A1511',
   },
 } as const;
 

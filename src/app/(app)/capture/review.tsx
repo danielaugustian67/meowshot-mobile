@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
+import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
@@ -101,6 +102,7 @@ export default function ReviewScreen() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
+        <PawPattern inScroll />
         <Image
           source={{ uri: draft.photo.uri }}
           style={[styles.photo, { aspectRatio: draft.photo.width / draft.photo.height || 1 }]}
