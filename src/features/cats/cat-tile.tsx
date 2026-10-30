@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -21,10 +22,13 @@ export function CatTile({ cat }: { cat: Cat }) {
   const seen = cat.last_sighting;
   const frame = FRAMES[cat.id % FRAMES.length];
   const tilt = TILTS[cat.id % TILTS.length];
+  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   return (
     <View style={styles.tile}>
       {/* The page colour under the 25% wash, so the paw pattern does not show through the card. */}
-      <View style={[styles.card, { backgroundColor: theme.background, transform: [{ rotate: tilt }] }]}>
+      <View
+        onLayout={(e) => setSize(e.nativeEvent.layout)}
+        style={[styles.card, { backgroundColor: theme.background, transform: [{ rotate: tilt }] }]}>
         <View style={[StyleSheet.absoluteFill, styles.wash, { backgroundColor: `${frame}40`, borderColor: frame }]} />
         <View style={[styles.cover, { backgroundColor: theme.backgroundElement }]}>
           {cat.cover?.thumb_url ? (
@@ -68,6 +72,7 @@ export function CatTile({ cat }: { cat: Cat }) {
             </ThemedText>
           ) : null}
         </View>
+        {size ? <BorderPaws width={size.width} height={size.height} color={frame} /> : null}
         <View style={[styles.sticker, { backgroundColor: frame, borderColor: theme.background }]}>
           <SymbolView name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} size={14} tintColor="#ffffff" />
         </View>
@@ -76,14 +81,54 @@ export function CatTile({ cat }: { cat: Cat }) {
   );
 }
 
+/** Little paw beads strung along the frame line, evenly spaced on each straight edge. */
+function BorderPaws({ width, height, color }: { width: number; height: number; color: string }) {
+  // Centre of the 3pt border line, measured from the card edge.
+  const line = BORDER / 2;
+  const beads: { x: number; y: number }[] = [];
+  const edge = (length: number, at: (offset: number) => { x: number; y: number }) => {
+    // Corners are rounded, so beads stay on the straight part between them.
+    const run = length - 2 * RADIUS;
+    const count = Math.max(1, Math.round(run / PAW_SPACING));
+    for (let i = 0; i < count; i++) beads.push(at(RADIUS + ((i + 0.5) * run) / count));
+  };
+  edge(width, (x) => ({ x, y: line }));
+  edge(width, (x) => ({ x, y: height - line }));
+  edge(height, (y) => ({ x: line, y }));
+  edge(height, (y) => ({ x: width - line, y }));
+  return (
+    <>
+      {beads.map((b, i) => (
+        <View
+          key={i}
+          style={[
+            styles.bead,
+            {
+              left: b.x - BEAD / 2,
+              top: b.y - BEAD / 2,
+              backgroundColor: color,
+              // Alternate the angle so the prints look like steps, not a printed row.
+              transform: [{ rotate: i % 2 ? '20deg' : '-20deg' }],
+            },
+          ]}>
+          <SymbolView name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} size={9} tintColor="#ffffff" />
+        </View>
+      ))}
+    </>
+  );
+}
+
 const RADIUS = 20;
 const INSET = Spacing.two;
+const BORDER = 3;
+const BEAD = 16;
+const PAW_SPACING = 36;
 
 const styles = StyleSheet.create({
   // Exactly half the row, so a lone tile in the last row keeps the same size as the others.
   tile: { flex: 1, maxWidth: '50%', paddingHorizontal: Spacing.three / 2 },
   card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: INSET },
-  wash: { borderRadius: RADIUS, borderCurve: 'continuous', borderWidth: 3 },
+  wash: { borderRadius: RADIUS, borderCurve: 'continuous', borderWidth: BORDER },
   cover: {
     aspectRatio: 1,
     borderRadius: RADIUS - INSET,
@@ -105,6 +150,15 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: '#ffffff' },
   favorite: { position: 'absolute', top: Spacing.two, right: Spacing.two },
+  bead: {
+    position: 'absolute',
+    width: BEAD,
+    height: BEAD,
+    borderRadius: BEAD / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
   // A round paw "sticker" stuck over the top-left corner of the frame.
   sticker: {
     position: 'absolute',
