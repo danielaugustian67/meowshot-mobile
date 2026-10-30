@@ -1,5 +1,7 @@
 // One typed function per backend route (see mewshot-be README "Endpoint").
 
+import { Platform } from 'react-native';
+
 import { request } from './client';
 import type {
   AppNotification,
@@ -42,14 +44,16 @@ export type LocationFields = {
   seen_at?: string;
 };
 
-function photoForm(file: UploadFile, fields: Record<string, string | number | boolean | undefined>) {
+async function photoForm(file: UploadFile, fields: Record<string, string | number | boolean | undefined>) {
   const form = new FormData();
-  // React Native's FormData accepts {uri, name, type} for files.
-  form.append('photo', {
-    uri: file.uri,
-    name: file.name ?? 'photo.jpg',
-    type: file.type ?? 'image/jpeg',
-  } as unknown as Blob);
+  const name = file.name ?? 'photo.jpg';
+  if (Platform.OS === 'web') {
+    // Browsers need a real Blob; picker/manipulator URIs on web are blob: or data: URLs.
+    form.append('photo', await (await fetch(file.uri)).blob(), name);
+  } else {
+    // React Native's FormData accepts {uri, name, type} for files.
+    form.append('photo', { uri: file.uri, name, type: file.type ?? 'image/jpeg' } as unknown as Blob);
+  }
   for (const [k, v] of Object.entries(fields)) {
     if (v !== undefined) form.append(k, String(v));
   }
@@ -79,7 +83,7 @@ export const meApi = {
   delete: (password: string) => request<void>('/me', { method: 'DELETE', body: { password } }),
   changePassword: (body: { current_password: string; new_password: string }) =>
     request<void>('/me/password', { method: 'PUT', body }),
-  putAvatar: (file: UploadFile) => request<Me>('/me/avatar', { method: 'PUT', form: photoForm(file, {}) }),
+  putAvatar: async (file: UploadFile) => request<Me>('/me/avatar', { method: 'PUT', form: await photoForm(file, {}) }),
   deleteAvatar: () => request<void>('/me/avatar', { method: 'DELETE' }),
 };
 
@@ -98,10 +102,10 @@ export const catsApi = {
   setCover: (id: number, photoId: number) =>
     request<Cat>(`/cats/${id}/cover`, { method: 'PUT', body: { photo_id: photoId } }),
   photos: (id: number, q: PageQuery = {}) => request<Page<Photo>>(`/cats/${id}/photos`, { query: q }),
-  uploadPhoto: (id: number, file: UploadFile, fields: LocationFields & { caption?: string; add_sighting?: boolean } = {}) =>
+  uploadPhoto: async (id: number, file: UploadFile, fields: LocationFields & { caption?: string; add_sighting?: boolean } = {}) =>
     request<{ photo: Photo; sighting: Sighting | null; detected_location: unknown }>(`/cats/${id}/photos`, {
       method: 'POST',
-      form: photoForm(file, fields),
+      form: await photoForm(file, fields),
     }),
   sightings: (id: number, q: PageQuery = {}) => request<Page<Sighting>>(`/cats/${id}/sightings`, { query: q }),
   addSighting: (id: number, body: { lat?: number; lng?: number; label?: string; source?: string; seen_at?: string }) =>
@@ -123,11 +127,11 @@ export const sightingsApi = {
 };
 
 /** Quick capture: one photo becomes a new unnamed cat (or goes to `cat_id`) plus a sighting. */
-export function capture(
+export async function capture(
   file: UploadFile,
   fields: LocationFields & { cat_id?: number; name?: string; notes?: string; caption?: string } = {},
 ) {
-  return request<CaptureResponse>('/captures', { method: 'POST', form: photoForm(file, fields) });
+  return request<CaptureResponse>('/captures', { method: 'POST', form: await photoForm(file, fields) });
 }
 
 export const usersApi = {
