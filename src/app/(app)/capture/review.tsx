@@ -97,7 +97,10 @@ export default function ReviewScreen() {
       style={[styles.flex, { backgroundColor: theme.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={100}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled">
         <Image
           source={{ uri: draft.photo.uri }}
           style={[styles.photo, { aspectRatio: draft.photo.width / draft.photo.height || 1 }]}
@@ -122,16 +125,16 @@ export default function ReviewScreen() {
             )}
             <View style={styles.row}>
               <Button
-                title="Lokasiku sekarang"
+                title="Lokasiku"
                 variant="secondary"
-                style={styles.flex}
+                style={[styles.cardButton, { backgroundColor: theme.background }]}
                 onPress={pickCurrentLocation}
                 loading={locating}
               />
               <Button
                 title="Pilih di peta"
                 variant="secondary"
-                style={styles.flex}
+                style={[styles.cardButton, { backgroundColor: theme.background }]}
                 onPress={() => router.push('/capture/pick-location')}
               />
             </View>
@@ -190,5 +193,7 @@ const styles = StyleSheet.create({
   section: { gap: Spacing.two },
   card: { borderRadius: 14, padding: Spacing.three, gap: Spacing.two },
   row: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.one },
+  // The card shares the secondary button colour, so these sit on the page background instead.
+  cardButton: { flex: 1 },
   spinner: { paddingVertical: Spacing.two },
 });
