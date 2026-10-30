@@ -44,6 +44,25 @@
         }
       ],
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Meowshot memakai kamera untuk memotret kucing yang kamu temui.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Meowshot memakai galeri untuk memilih foto kucing yang ingin kamu simpan.",
+          "savePhotosPermission": false,
+          "isAccessMediaLocationEnabled": true,
+          "granularPermissions": [
+            "photo"
+          ]
+        }
+      ],
+      [
         "expo-location",
         {
           "locationWhenInUsePermission": "Meowshot mencatat lokasi tempat kamu bertemu kucing. Kamu bisa mengatur seberapa presisi lokasi dibagikan."
