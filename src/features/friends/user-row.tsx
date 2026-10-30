@@ -4,14 +4,14 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { useOpenProfile } from '@/features/users/open-profile';
+import { useStackLinks } from '@/hooks/use-stack-links';
 import type { User } from '@/lib/api/types';
 import { useT } from '@/lib/i18n';
 
 /** A person in a list card: avatar, @username, bio, and actions on the right (the children). The person opens their profile. */
 export function UserRow({ user, children }: PropsWithChildren<{ user: User }>) {
   const t = useT();
-  const openProfile = useOpenProfile();
+  const { openProfile } = useStackLinks();
   return (
     <View style={styles.row}>
       <Pressable

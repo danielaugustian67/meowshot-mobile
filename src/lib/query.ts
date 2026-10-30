@@ -45,4 +45,5 @@ export const queryKeys = {
   userSearch: (q: string) => ['users', 'search', q] as const,
   userProfile: (username: string) => ['users', 'profile', username] as const,
   userPosts: (username: string) => ['posts', 'user', username] as const,
+  post: (id: number) => ['posts', 'detail', id] as const,
 };

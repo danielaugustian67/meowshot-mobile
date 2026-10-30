@@ -40,6 +40,9 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+/** Pastel frame colours that read on both the off-white and the black page. Pick one with `id % Pastels.length`. */
+export const Pastels = ['#FFB37A', '#F7A8C4', '#8FD6AE', '#9EC2F5', '#F5D46E', '#C5B0F5'] as const;
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */

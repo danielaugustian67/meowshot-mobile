@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { useOpenProfile } from '@/features/users/open-profile';
+import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import { REACTIONS, type Post } from '@/lib/api/types';
 import { catName, daysAgo } from '@/lib/format';
@@ -17,7 +17,7 @@ const AVATAR = 36;
 export function PostCard({ post, linkAuthor = true }: { post: Post; linkAuthor?: boolean }) {
   const theme = useTheme();
   const t = useT();
-  const openProfile = useOpenProfile();
+  const { openProfile } = useStackLinks();
   const photo = post.photos[0];
   const name = catName(post.cat.name);
   const place = post.location?.label;
