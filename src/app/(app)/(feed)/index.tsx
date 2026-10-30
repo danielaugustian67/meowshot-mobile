@@ -2,19 +2,17 @@ import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Placeholder } from '@/components/placeholder';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { PostList } from '@/features/feed/post-list';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/lib/i18n';
-
-type Scope = 'friends' | 'public';
+import type { FeedScope as Scope } from '@/lib/query';
 
 // Remembered while the app runs, so leaving the tab and coming back keeps the same list.
 let lastScope: Scope = 'public';
 
 export default function FeedScreen() {
-  const t = useT();
   const [scope, setScope] = useState<Scope>(lastScope);
 
   function choose(next: Scope) {
@@ -25,19 +23,8 @@ export default function FeedScreen() {
   return (
     <>
       <Stack.Screen options={{ headerTitle: () => <ScopeSwitch value={scope} onChange={choose} /> }} />
-      {scope === 'friends' ? (
-        <Placeholder
-          icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }}
-          title={t.placeholder.feed}
-          body={t.common.comingSoon}
-        />
-      ) : (
-        <Placeholder
-          icon={{ ios: 'globe', android: 'public', web: 'public' }}
-          title={t.placeholder.explore}
-          body={t.common.comingSoon}
-        />
-      )}
+      {/* Keyed so switching scope starts the other list at the top, not at this one's scroll offset. */}
+      <PostList key={scope} scope={scope} />
     </>
   );
 }

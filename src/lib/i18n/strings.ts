@@ -50,10 +50,13 @@ const id = {
   feed: {
     friends: 'Teman',
     public: 'Publik',
+    emptyTitle: 'Belum ada post',
+    emptyFriends: 'Post kamu dan temanmu muncul di sini.',
+    emptyPublic: 'Post publik dari semua orang muncul di sini.',
+    comments: (n: number) => `${n} komentar`,
+    photoAlt: (name: string) => `Foto ${name}`,
   },
   placeholder: {
-    feed: 'Post teman',
-    explore: 'Post publik',
     cats: 'Koleksi kucingmu',
   },
   capture: {
@@ -207,10 +210,13 @@ const en: Strings = {
   feed: {
     friends: 'Friends',
     public: 'Public',
+    emptyTitle: 'No posts yet',
+    emptyFriends: 'Posts from you and your friends show up here.',
+    emptyPublic: 'Public posts from everyone show up here.',
+    comments: (n: number) => (n === 1 ? '1 comment' : `${n} comments`),
+    photoAlt: (name: string) => `Photo of ${name}`,
   },
   placeholder: {
-    feed: "Friends' posts",
-    explore: 'Public posts',
     cats: 'Your cat collection',
   },
   capture: {
