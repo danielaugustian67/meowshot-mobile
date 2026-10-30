@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "Meowshot",
+    "slug": "meowshot",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "meowshot",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "me.zyros.meowshot"
+    },
+    "android": {
+      "package": "me.zyros.meowshot",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF1E6",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#E8620C",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Meowshot memakai galeri untuk memilih foto kucing yang ingin kamu simpan.",
+          "cameraPermission": "Meowshot memakai kamera untuk memotret kucing yang kamu temui."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Meowshot mencatat lokasi tempat kamu bertemu kucing. Kamu bisa mengatur seberapa presisi lokasi dibagikan."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
