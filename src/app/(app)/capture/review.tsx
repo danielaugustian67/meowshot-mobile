@@ -16,16 +16,17 @@ import { updateDraft, useCaptureDraft, type DraftLocation } from '@/features/cap
 import { currentLocation } from '@/features/capture/media';
 import { capture, catsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
+import { useT, type Strings } from '@/lib/i18n';
 import { queryClient, queryKeys } from '@/lib/query';
 
 const SUGGEST_RADIUS_M = 300; // same radius the server uses for capture suggestions
 
-function describe(loc: DraftLocation) {
+function describe(loc: DraftLocation, t: Strings) {
   switch (loc.source) {
     case 'exif':
-      return 'Dari foto';
+      return t.capture.fromPhoto;
     case 'manual':
-      return 'Dari peta';
+      return t.capture.fromMap;
     default:
       return loc.accuracy ? `GPS (±${Math.round(loc.accuracy)} m)` : 'GPS';
   }
@@ -33,6 +34,7 @@ function describe(loc: DraftLocation) {
 
 export default function ReviewScreen() {
   const theme = useTheme();
+  const t = useT();
   const draft = useCaptureDraft();
   const [label, setLabel] = useState('');
   const [name, setName] = useState('');
@@ -60,7 +62,7 @@ export default function ReviewScreen() {
     const fix = await currentLocation();
     setLocating(false);
     if (fix) updateDraft({ location: fix });
-    else setError('Lokasi tidak tersedia.');
+    else setError(t.common.locationUnavailable);
   }
 
   async function save() {
@@ -107,32 +109,32 @@ export default function ReviewScreen() {
           source={{ uri: draft.photo.uri }}
           style={[styles.photo, { aspectRatio: draft.photo.width / draft.photo.height || 1 }]}
           contentFit="cover"
-          accessibilityLabel="Foto kucing yang akan disimpan"
+          accessibilityLabel={t.capture.photoAlt}
         />
 
         <View style={styles.section}>
-          <ThemedText type="smallBold">Lokasi</ThemedText>
+          <ThemedText type="smallBold">{t.capture.location}</ThemedText>
           <View style={[styles.card, { backgroundColor: theme.backgroundElement }]}>
             {loc ? (
               <>
-                <ThemedText>📍 {describe(loc)}</ThemedText>
+                <ThemedText>📍 {describe(loc, t)}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {loc.lat.toFixed(5)}, {loc.lng.toFixed(5)}
                 </ThemedText>
               </>
             ) : (
-              <ThemedText themeColor="textSecondary">Foto ini tanpa lokasi.</ThemedText>
+              <ThemedText themeColor="textSecondary">{t.capture.noLocation}</ThemedText>
             )}
             <View style={styles.row}>
               <Button
-                title="Lokasiku"
+                title={t.common.myLocation}
                 variant="secondary"
                 style={[styles.cardButton, { backgroundColor: theme.background }]}
                 onPress={pickCurrentLocation}
                 loading={locating}
               />
               <Button
-                title="Pilih di peta"
+                title={t.capture.pickOnMap}
                 variant="secondary"
                 style={[styles.cardButton, { backgroundColor: theme.background }]}
                 onPress={() => router.push('/capture/pick-location')}
@@ -140,8 +142,8 @@ export default function ReviewScreen() {
             </View>
           </View>
           <TextField
-            label="Tempat (opsional)"
-            placeholder="Depan Indomaret"
+            label={t.capture.place}
+            placeholder={t.capture.placeExample}
             value={label}
             onChangeText={setLabel}
             maxLength={200}
@@ -149,12 +151,12 @@ export default function ReviewScreen() {
         </View>
 
         <View style={styles.section} accessibilityRole="radiogroup">
-          <ThemedText type="smallBold">Simpan ke</ThemedText>
+          <ThemedText type="smallBold">{t.capture.saveTo}</ThemedText>
           <CatOption kind="new" selected={chosen === 'new'} onPress={() => setTarget('new')} />
           {loc && nearby.isPending ? <ActivityIndicator style={styles.spinner} /> : null}
           {suggestions.length > 0 ? (
             <ThemedText type="small" themeColor="textSecondary">
-              Atau kucing di dekat sini:
+              {t.capture.nearby}
             </ThemedText>
           ) : null}
           {suggestions.map((s) => (
@@ -169,7 +171,7 @@ export default function ReviewScreen() {
           ))}
           {chosen === 'new' ? (
             <TextField
-              label="Nama (opsional)"
+              label={t.capture.name}
               placeholder="Oyen"
               value={name}
               onChangeText={setName}
@@ -179,7 +181,7 @@ export default function ReviewScreen() {
         </View>
 
         <FormError message={error} />
-        <Button title="Simpan" onPress={save} loading={saving} />
+        <Button title={t.common.save} onPress={save} loading={saving} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

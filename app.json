@@ -67,7 +67,8 @@
         {
           "locationWhenInUsePermission": "Meowshot mencatat lokasi tempat kamu bertemu kucing. Kamu bisa mengatur seberapa presisi lokasi dibagikan."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

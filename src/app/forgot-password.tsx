@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { authApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
+import { useT } from '@/lib/i18n';
 
 export default function ForgotPasswordScreen() {
+  const t = useT();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -29,9 +31,9 @@ export default function ForgotPasswordScreen() {
 
   return (
     <FormScreen>
-      <ThemedText themeColor="textSecondary">Kode reset dikirim ke emailmu.</ThemedText>
+      <ThemedText themeColor="textSecondary">{t.auth.forgotBody}</ThemedText>
       <TextField
-        label="Email"
+        label={t.common.email}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -41,7 +43,7 @@ export default function ForgotPasswordScreen() {
         onSubmitEditing={submit}
       />
       <FormError message={error} />
-      <Button title="Kirim kode" onPress={submit} loading={busy} disabled={!email.trim()} />
+      <Button title={t.auth.sendCode} onPress={submit} loading={busy} disabled={!email.trim()} />
     </FormScreen>
   );
 }

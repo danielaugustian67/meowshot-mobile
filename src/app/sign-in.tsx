@@ -11,9 +11,11 @@ import { Spacing } from '@/constants/theme';
 import { authApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useSession } from '@/lib/auth/session';
+import { useT } from '@/lib/i18n';
 
 export default function SignInScreen() {
   const { signIn } = useSession();
+  const t = useT();
   const [ident, setIdent] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -36,11 +38,11 @@ export default function SignInScreen() {
       <View style={styles.hero}>
         <ThemedText style={styles.logo}>🐾</ThemedText>
         <ThemedText type="subtitle">Meowshot</ThemedText>
-        <ThemedText themeColor="textSecondary">Koleksi kucing jalananmu.</ThemedText>
+        <ThemedText themeColor="textSecondary">{t.auth.tagline}</ThemedText>
       </View>
 
       <TextField
-        label="Email atau username"
+        label={t.auth.ident}
         value={ident}
         onChangeText={setIdent}
         autoCapitalize="none"
@@ -51,7 +53,7 @@ export default function SignInScreen() {
         returnKeyType="next"
       />
       <TextField
-        label="Password"
+        label={t.common.password}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -61,16 +63,16 @@ export default function SignInScreen() {
         onSubmitEditing={submit}
       />
       <FormError message={error} />
-      <Button title="Masuk" onPress={submit} loading={busy} disabled={!ident.trim() || !password} />
+      <Button title={t.auth.signIn} onPress={submit} loading={busy} disabled={!ident.trim() || !password} />
 
       <Link href="/forgot-password" asChild>
-        <Button title="Lupa password?" variant="ghost" />
+        <Button title={t.auth.forgot} variant="ghost" />
       </Link>
 
       <View style={styles.footer}>
-        <ThemedText themeColor="textSecondary">Belum punya akun?</ThemedText>
+        <ThemedText themeColor="textSecondary">{t.auth.noAccount}</ThemedText>
         <Link href="/sign-up" asChild>
-          <Button title="Daftar sekarang" variant="secondary" />
+          <Button title={t.auth.signUpNow} variant="secondary" />
         </Link>
       </View>
     </FormScreen>

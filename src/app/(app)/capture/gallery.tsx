@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { pickFromSystemLibrary, startDraft } from '@/features/capture/prepare';
+import { useT } from '@/lib/i18n';
 
 const COLUMNS = 4;
 const GAP = 2;
@@ -57,6 +58,7 @@ export default function GalleryScreen() {
 
 function PhotoGrid({ limited }: { limited: boolean }) {
   const theme = useTheme();
+  const t = useT();
   const { width } = useWindowDimensions();
   // The iOS header is translucent and floats over content; start the preview below it.
   const headerHeight = useHeaderHeight();
@@ -112,7 +114,7 @@ function PhotoGrid({ limited }: { limited: boolean }) {
         selected.creationTime ? new Date(selected.creationTime).toISOString() : null,
       );
     } catch {
-      setError('Foto tidak bisa dibuka.');
+      setError(t.common.photoOpenFailed);
     } finally {
       setBusy(false);
     }
@@ -128,7 +130,7 @@ function PhotoGrid({ limited }: { limited: boolean }) {
             ) : (
               <Pressable accessibilityRole="button" disabled={!selected} onPress={next} hitSlop={8}>
                 <ThemedText type="smallBold" style={{ color: theme.tint, fontSize: 17, opacity: selected ? 1 : 0.4 }}>
-                  Lanjut
+                  {t.common.next}
                 </ThemedText>
               </Pressable>
             ),
@@ -144,10 +146,10 @@ function PhotoGrid({ limited }: { limited: boolean }) {
           onPress={() => presentPermissionsPicker(['photo']).catch(() => Linking.openSettings())}
           style={[styles.limited, { borderBottomColor: theme.border }]}>
           <ThemedText type="small" themeColor="textSecondary">
-            Akses terbatas
+            {t.capture.limited}
           </ThemedText>
           <ThemedText type="smallBold" style={{ color: theme.tint }}>
-            Kelola
+            {t.capture.manage}
           </ThemedText>
         </Pressable>
       )}
@@ -188,6 +190,7 @@ function PhotoGrid({ limited }: { limited: boolean }) {
 
 function GalleryPermission({ canAsk, onAllow }: { canAsk: boolean; onAllow: () => void }) {
   const theme = useTheme();
+  const t = useT();
   const [error, setError] = useState<string | null>(null);
 
   async function pickOne() {
@@ -195,7 +198,7 @@ function GalleryPermission({ canAsk, onAllow }: { canAsk: boolean; onAllow: () =
     try {
       await pickFromSystemLibrary();
     } catch {
-      setError('Foto tidak bisa dibuka.');
+      setError(t.common.photoOpenFailed);
     }
   }
 
@@ -204,10 +207,10 @@ function GalleryPermission({ canAsk, onAllow }: { canAsk: boolean; onAllow: () =
       <PawPattern />
       <View style={styles.hero}>
         <HeroIcon name={{ ios: 'photo.on.rectangle', android: 'photo_library', web: 'photo_library' }} />
-        <ThemedText type="smallBold">Izinkan akses galeri</ThemedText>
+        <ThemedText type="smallBold">{t.capture.allowGallery}</ThemedText>
       </View>
-      <Button title={canAsk ? 'Izinkan' : 'Buka Pengaturan'} onPress={canAsk ? onAllow : () => Linking.openSettings()} />
-      <Button title="Pilih satu foto" variant="secondary" onPress={pickOne} />
+      <Button title={canAsk ? t.common.allow : t.common.openSettings} onPress={canAsk ? onAllow : () => Linking.openSettings()} />
+      <Button title={t.capture.pickOne} variant="secondary" onPress={pickOne} />
       <FormError message={error} />
     </View>
   );
