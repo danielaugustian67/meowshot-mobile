@@ -42,11 +42,17 @@ export function ListRow({
   onPress,
   destructive,
   chevron = true,
+  detail,
+  badge,
 }: {
   label: string;
   onPress: () => void;
   destructive?: boolean;
   chevron?: boolean;
+  /** Secondary text before the chevron, such as a count. */
+  detail?: string;
+  /** Something waiting for the user, such as unanswered requests; hidden at 0. */
+  badge?: number;
 }) {
   const theme = useTheme();
   return (
@@ -55,6 +61,14 @@ export function ListRow({
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && { backgroundColor: theme.backgroundSelected }]}>
       <ThemedText style={[styles.label, destructive && { color: theme.danger }]}>{label}</ThemedText>
+      {badge ? (
+        <View style={[styles.badge, { backgroundColor: theme.tint }]}>
+          <ThemedText type="smallBold" style={{ color: theme.onTint }}>
+            {badge}
+          </ThemedText>
+        </View>
+      ) : null}
+      {detail ? <ThemedText themeColor="textSecondary">{detail}</ThemedText> : null}
       {chevron ? (
         <SymbolView
           name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
@@ -80,4 +94,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
   },
   label: { flex: 1 },
+  badge: { minWidth: 22, height: 22, borderRadius: 11, paddingHorizontal: 6, alignItems: 'center', justifyContent: 'center' },
 });
