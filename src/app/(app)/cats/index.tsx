@@ -6,6 +6,7 @@ import { PawPattern } from '@/components/paw-pattern';
 import { Placeholder } from '@/components/placeholder';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
+import { LeanList } from '@/constants/list';
 import { Spacing } from '@/constants/theme';
 import { CatTile } from '@/features/cats/cat-tile';
 import { useMyCats } from '@/features/cats/queries';
@@ -50,6 +51,7 @@ export default function CatsScreen() {
 
   return (
     <FlatList
+      {...LeanList}
       data={cats}
       keyExtractor={(c) => String(c.id)}
       renderItem={({ item }) => <CatTile cat={item} />}

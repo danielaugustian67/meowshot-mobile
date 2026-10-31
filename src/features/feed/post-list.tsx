@@ -7,6 +7,7 @@ import { PawPattern } from '@/components/paw-pattern';
 import { Placeholder } from '@/components/placeholder';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
+import { LeanList } from '@/constants/list';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { postsApi } from '@/lib/api/endpoints';
@@ -61,6 +62,7 @@ export function PostList({ scope }: { scope: FeedScope }) {
 
   return (
     <FlatList
+      {...LeanList}
       data={posts}
       keyExtractor={(p) => String(p.id)}
       renderItem={({ item }) => <PostCard post={item} />}

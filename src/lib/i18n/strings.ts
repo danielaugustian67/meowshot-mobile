@@ -46,6 +46,8 @@ const id = {
     newPassword: 'Password baru',
     savePassword: 'Simpan password',
     passwordChanged: 'Password diganti',
+    or: 'atau',
+    google: 'Masuk dengan Google',
   },
   feed: {
     friends: 'Teman',
@@ -192,6 +194,7 @@ const id = {
     already_friends: 'Kalian sudah berteman.',
     already_requested: 'Permintaan sudah dikirim.',
     google_disabled: 'Login Google belum tersedia.',
+    google_rejected: 'Login Google gagal. Coba lagi.',
     not_found: 'Data tidak ditemukan.',
     fallback: 'Gagal. Coba lagi.',
   } as Record<string, string>,
@@ -245,6 +248,8 @@ const en: Strings = {
     newPassword: 'New password',
     savePassword: 'Save password',
     passwordChanged: 'Password changed',
+    or: 'or',
+    google: 'Sign in with Google',
   },
   feed: {
     friends: 'Friends',
@@ -391,6 +396,7 @@ const en: Strings = {
     already_friends: 'You are already friends.',
     already_requested: 'Request already sent.',
     google_disabled: 'Google sign-in is not available yet.',
+    google_rejected: 'Google sign-in failed. Try again.',
     not_found: 'Not found.',
     fallback: 'Failed. Try again.',
   },

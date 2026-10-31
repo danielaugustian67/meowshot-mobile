@@ -12,6 +12,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/section-title';
+import { LeanList } from '@/constants/list';
 import { Fonts, Pastels, Spacing } from '@/constants/theme';
 import { CatCarousel } from '@/features/cats/cat-carousel';
 import { useFriendAction } from '@/features/friends/queries';
@@ -95,6 +96,7 @@ function PostGrid({ profile, refetchProfile }: { profile: Profile; refetchProfil
 
   return (
     <FlatList
+      {...LeanList}
       data={items}
       keyExtractor={(p) => String(p.id)}
       numColumns={COLUMNS}

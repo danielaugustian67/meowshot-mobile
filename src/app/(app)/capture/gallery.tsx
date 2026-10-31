@@ -28,6 +28,7 @@ import { HeroIcon } from '@/components/hero-icon';
 import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
+import { LeanList } from '@/constants/list';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { pickFromSystemLibrary, startDraft } from '@/features/capture/prepare';
@@ -154,9 +155,12 @@ function PhotoGrid({ limited }: { limited: boolean }) {
         </Pressable>
       )}
       <FlatList
+        {...LeanList}
         data={photos}
         keyExtractor={(p) => p.id}
         numColumns={COLUMNS}
+        // Rows are fixed squares, so FlatList can skip measuring them while scrolling.
+        getItemLayout={(_, index) => ({ length: cell, offset: GAP + (cell + GAP) * index, index })}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.grid}
         contentInsetAdjustmentBehavior="automatic"

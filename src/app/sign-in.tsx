@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FormError, FormScreen } from '@/components/form-screen';
+import { GoogleSignInButton } from '@/components/google-sign-in-button';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
@@ -68,6 +69,8 @@ export default function SignInScreen() {
       <Link href="/forgot-password" asChild>
         <Button title={t.auth.forgot} variant="ghost" />
       </Link>
+
+      <GoogleSignInButton onStart={() => setError(null)} onError={(e) => setError(errorMessage(e))} />
 
       <View style={styles.footer}>
         <ThemedText themeColor="textSecondary">{t.auth.noAccount}</ThemedText>

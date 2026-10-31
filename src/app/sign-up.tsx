@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { FormError, FormScreen } from '@/components/form-screen';
+import { GoogleSignInButton } from '@/components/google-sign-in-button';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { ApiError } from '@/lib/api/client';
@@ -24,6 +25,11 @@ export default function SignUpScreen() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  function showError(e: unknown) {
+    if (e instanceof ApiError && e.code === 'invite_required') setNeedsInvite(true);
+    setError(errorMessage(e));
+  }
+
   async function submit() {
     const name = username.trim().toLowerCase();
     if (!USERNAME_RE.test(name)) {
@@ -45,8 +51,7 @@ export default function SignUpScreen() {
       });
       await signIn(res);
     } catch (e) {
-      if (e instanceof ApiError && e.code === 'invite_required') setNeedsInvite(true);
-      setError(errorMessage(e));
+      showError(e);
       setBusy(false);
     }
   }
@@ -92,6 +97,7 @@ export default function SignUpScreen() {
         loading={busy}
         disabled={!email.trim() || !username.trim() || !password}
       />
+      <GoogleSignInButton inviteCode={invite.trim()} onStart={() => setError(null)} onError={showError} />
     </FormScreen>
   );
 }

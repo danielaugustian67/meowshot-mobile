@@ -32,6 +32,9 @@ async function latestPhoto(): Promise<string | null> {
   return first?.id ?? null;
 }
 
+// Comfortably above the 1600 px upload size (compressPhoto), far below full sensor resolution.
+const ANDROID_PICTURE_SIZE = '2048x1536';
+
 export default function CameraScreen() {
   const camera = useRef<CameraView>(null);
   const t = useT();
@@ -108,6 +111,9 @@ export default function CameraScreen() {
           facing={facing}
           flash={flash}
           mirror={facing === 'front'}
+          // Android otherwise shoots at the sensor's full size (50 MP on many cheap phones), and resizing that
+          // to 1600 px needs a ~200 MB bitmap. CameraX picks the closest 4:3 size at or below this one.
+          pictureSize={Platform.OS === 'android' ? ANDROID_PICTURE_SIZE : undefined}
           onCameraReady={() => setReady(true)}
           onMountError={() => setUnavailable(true)}
         />

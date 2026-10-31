@@ -68,7 +68,21 @@
           "locationWhenInUsePermission": "Meowshot mencatat lokasi tempat kamu bertemu kucing. Kamu bisa mengatur seberapa presisi lokasi dibagikan."
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.554006493413-hudoaj15acn03p7c538dnj4b4evqljec"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "# Room finds each database's generated _Impl class by name; R8 renamed it and release builds crashed\n# on launch (WorkManager's WorkDatabase, pulled in by react-native-maps).\n-keepnames class * extends androidx.room.RoomDatabase\n-keep class * extends androidx.room.RoomDatabase { <init>(); }\n"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
