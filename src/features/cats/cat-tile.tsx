@@ -1,9 +1,10 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Image as NativeImage, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { LOW_MEMORY } from '@/constants/device';
 import { Fonts, Pastels, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { CollectionCat, Sighting } from '@/lib/api/types';
@@ -42,7 +43,8 @@ export function CatTile({
       style={({ pressed }) => [styles.tile, style, pressed && styles.pressed]}>
       {/* The page colour under the 25% wash, so the paw pattern does not show through the card. */}
       <View
-        onLayout={(e) => setSize(e.nativeEvent.layout)}
+        // Only the beads need the size, and low-memory phones go without them.
+        onLayout={LOW_MEMORY ? undefined : (e) => setSize(e.nativeEvent.layout)}
         style={[styles.card, { backgroundColor: theme.background, transform: [{ rotate: tilt }] }]}>
         <View style={[StyleSheet.absoluteFill, styles.wash, { backgroundColor: `${frame}40`, borderColor: frame }]} />
         <View style={[styles.cover, { backgroundColor: theme.backgroundElement }]}>
@@ -96,7 +98,12 @@ export function CatTile({
   );
 }
 
-/** Little paw beads strung along the frame line, evenly spaced on each straight edge. */
+const BEAD_PAW = require('@/assets/images/paw-bead.png');
+
+/**
+ * Little paw beads strung along the frame line, evenly spaced on each straight edge. A card has a dozen or
+ * more, so each paw is the same small bitmap rather than a symbol view of its own.
+ */
 export function BorderPaws({ width, height, color }: { width: number; height: number; color: string }) {
   // Centre of the 3pt border line, measured from the card edge.
   const line = BORDER / 2;
@@ -126,7 +133,7 @@ export function BorderPaws({ width, height, color }: { width: number; height: nu
               transform: [{ rotate: i % 2 ? '20deg' : '-20deg' }],
             },
           ]}>
-          <SymbolView name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} size={9} tintColor="#ffffff" />
+          <NativeImage source={BEAD_PAW} style={styles.beadPaw} />
         </View>
       ))}
     </>
@@ -175,6 +182,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     pointerEvents: 'none',
   },
+  beadPaw: { width: 9, height: 9 },
   // A round paw "sticker" stuck over the top-left corner of the frame.
   sticker: {
     position: 'absolute',

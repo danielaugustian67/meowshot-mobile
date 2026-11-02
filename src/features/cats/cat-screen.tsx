@@ -21,6 +21,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/section-title';
+import { LOW_MEMORY } from '@/constants/device';
+import { LeanList } from '@/constants/list';
 import { Fonts, Pastels, Spacing } from '@/constants/theme';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
@@ -96,6 +98,7 @@ export default function CatScreen() {
         }}
       />
       <FlatList
+        {...LeanList}
         data={photos.data?.pages.flatMap((p) => p.items) ?? []}
         keyExtractor={(p) => String(p.id)}
         renderItem={({ item }) => <PhotoTile photo={item} cat={current} size={tile} />}
@@ -148,7 +151,8 @@ function Hero({ cat }: { cat: Cat }) {
   const cover = cat.cover;
   return (
     <View
-      onLayout={(e) => setSize(e.nativeEvent.layout)}
+      // Only the beads need the size, and low-memory phones go without them.
+      onLayout={LOW_MEMORY ? undefined : (e) => setSize(e.nativeEvent.layout)}
       style={[styles.hero, { backgroundColor: theme.background }]}>
       <View style={[StyleSheet.absoluteFill, styles.wash, { backgroundColor: `${frame}40`, borderColor: frame }]} />
       <View style={[styles.cover, { backgroundColor: theme.backgroundElement }]}>

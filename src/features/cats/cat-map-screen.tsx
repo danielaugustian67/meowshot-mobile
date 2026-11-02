@@ -183,6 +183,14 @@ export default function CatMapScreen() {
   );
 }
 
+/**
+ * Signed URLs change on every fetch, but the path before the query names the photo. Caching by the path
+ * keeps a refetched map from downloading and storing every cover again.
+ */
+function thumbKey(url: string) {
+  return url.split('?')[0];
+}
+
 /** One cat's cover in a pastel ring, with a count when it stands for several. */
 function CatPin({ cluster, onPress }: { cluster: Cluster; onPress: () => void }) {
   const theme = useTheme();
@@ -208,7 +216,7 @@ function CatPin({ cluster, onPress }: { cluster: Cluster; onPress: () => void })
           ]}>
           {thumb ? (
             <Image
-              source={{ uri: thumb }}
+              source={{ uri: thumb, cacheKey: thumbKey(thumb) }}
               style={StyleSheet.absoluteFill}
               contentFit="cover"
               onDisplay={() => setDrawn(true)}
@@ -272,7 +280,11 @@ function Selection({
                 { borderColor: Pastels[m.cat_id % Pastels.length], backgroundColor: theme.backgroundElement },
               ]}>
               {m.thumb_url ? (
-                <Image source={{ uri: m.thumb_url }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                <Image
+                  source={{ uri: m.thumb_url, cacheKey: thumbKey(m.thumb_url) }}
+                  style={StyleSheet.absoluteFill}
+                  contentFit="cover"
+                />
               ) : (
                 <SymbolView
                   name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }}
