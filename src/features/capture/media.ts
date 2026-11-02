@@ -30,18 +30,40 @@ export async function ensureLocationPermission(): Promise<boolean> {
 /**
  * A GPS fix for "where am I now". A recent cached fix is used when it is precise enough,
  * because a fresh one can take several seconds and capture should feel instant.
+ * On Android a fix can open Google's "turn on Location Accuracy" dialog; pass `askToEnable: false`
+ * when the user did not ask for their location, so that dialog only follows a tap.
  */
-export async function currentLocation(): Promise<DraftLocation | null> {
+export async function currentLocation({ askToEnable = true } = {}): Promise<DraftLocation | null> {
   if (!(await ensureLocationPermission())) return null;
   try {
     const cached = await Location.getLastKnownPositionAsync({ maxAge: 60_000, requiredAccuracy: 100 });
-    const fix = cached ?? (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }));
+    const fix =
+      cached ??
+      (await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+        mayShowUserSettingsDialog: askToEnable,
+      }));
     return {
       lat: fix.coords.latitude,
       lng: fix.coords.longitude,
       source: 'device',
       accuracy: fix.coords.accuracy,
     };
+  } catch {
+    return null;
+  }
+}
+
+/** The fix if it arrives within `ms`, otherwise null, for callers that cannot keep the user waiting for GPS. */
+export function fixWithin(fix: Promise<DraftLocation | null>, ms: number): Promise<DraftLocation | null> {
+  return Promise.race([fix, new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))]);
+}
+
+/** Where a typed place is, from the phone's own geocoder, or null when it finds nothing. */
+export async function findPlace(query: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const [place] = await Location.geocodeAsync(query);
+    return place ? { lat: place.latitude, lng: place.longitude } : null;
   } catch {
     return null;
   }

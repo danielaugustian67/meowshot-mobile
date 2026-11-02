@@ -1,4 +1,4 @@
-import type { Region } from 'react-native-maps';
+import type { LngLatBounds } from '@maplibre/maplibre-react-native';
 
 import type { MapMarker } from '@/lib/api/types';
 
@@ -11,12 +11,12 @@ export type Cluster = { key: string; lat: number; lng: number; markers: MapMarke
  */
 export function clusterMarkers(
   markers: MapMarker[],
-  region: Region,
+  [west, south, east, north]: LngLatBounds,
   size: { width: number; height: number },
   radius: number,
 ): Cluster[] {
-  const xPerLng = size.width / region.longitudeDelta;
-  const yPerLat = size.height / region.latitudeDelta;
+  const xPerLng = size.width / (east - west);
+  const yPerLat = size.height / (north - south);
   const clusters: Cluster[] = [];
   for (const m of markers) {
     const near = clusters.find(
@@ -26,6 +26,13 @@ export function clusterMarkers(
     else clusters.push({ key: String(m.cat_id), lat: m.lat, lng: m.lng, markers: [m] });
   }
   return clusters;
+}
+
+/** The box around a group of markers. */
+export function boundsOf(markers: MapMarker[]): LngLatBounds {
+  const lats = markers.map((m) => m.lat);
+  const lngs = markers.map((m) => m.lng);
+  return [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
 }
 
 /** How far apart a group of markers is, in degrees: the larger of its latitude and longitude spans. */

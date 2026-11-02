@@ -151,7 +151,10 @@ export default function ReviewScreen() {
                 title={t.capture.pickOnMap}
                 variant="secondary"
                 style={[styles.cardButton, { backgroundColor: theme.background }]}
-                onPress={() => router.push('/capture/pick-location')}
+                onPress={() => {
+                  setError(null);
+                  router.push('/capture/pick-location');
+                }}
               />
             </View>
           </View>

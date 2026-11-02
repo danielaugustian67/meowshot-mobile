@@ -34,7 +34,7 @@ export default function SignInScreen() {
   }
 
   return (
-    <FormScreen>
+    <FormScreen noHeader>
       <SafeAreaView edges={['top']} />
       <View style={styles.hero}>
         <ThemedText style={styles.logo}>🐾</ThemedText>

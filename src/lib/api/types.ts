@@ -23,6 +23,12 @@ export type Me = User & {
   created_at: string;
 };
 
+export type PendingSignup = {
+  verification_id: string;
+  email: string;
+  expires_in: number;
+};
+
 export type TokenResponse = {
   access_token: string;
   token_type: 'Bearer';

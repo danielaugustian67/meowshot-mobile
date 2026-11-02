@@ -6,6 +6,7 @@ import { authApi, meApi } from '@/lib/api/endpoints';
 import { getTokens, loadTokens, saveTokens } from '@/lib/api/tokens';
 import type { TokenResponse } from '@/lib/api/types';
 import { queryClient, queryKeys } from '@/lib/query';
+import { clearPersistedQueries } from '@/lib/query-persist';
 
 type Status = 'loading' | 'signedIn' | 'signedOut';
 
@@ -37,6 +38,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     // The client calls this when the refresh token is rejected or the account is suspended.
     setSessionEndedHandler(() => {
       queryClient.clear();
+      clearPersistedQueries();
       setStatus('signedOut');
     });
     return () => setSessionEndedHandler(null);
@@ -52,6 +54,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     const refresh = getTokens()?.refresh;
     await saveTokens(null);
     queryClient.clear();
+    clearPersistedQueries();
     setStatus('signedOut');
     // Best effort: the local session is already gone even if the server cannot be reached.
     if (refresh) authApi.logout(refresh).catch(() => {});

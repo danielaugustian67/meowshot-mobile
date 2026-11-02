@@ -1,6 +1,11 @@
 import { readItem, writeItem } from '@/lib/storage';
 
-export type Tokens = { access: string; refresh: string };
+export type Tokens = {
+  access: string;
+  refresh: string;
+  /** Device time the access token expires. Absent on tokens saved by older versions, which refresh on their first 401. */
+  expiresAt?: number;
+};
 
 const KEY = 'meowshot.tokens';
 

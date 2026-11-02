@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -21,7 +22,7 @@ export default function CatsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
   const query = useMyCats();
-  const { openCat } = useStackLinks();
+  const { openCat, tab } = useStackLinks();
 
   if (query.isPending) {
     return (
@@ -56,7 +57,13 @@ export default function CatsScreen() {
       {...LeanList}
       data={cats}
       keyExtractor={(c) => String(c.id)}
-      renderItem={({ item }) => <CatTile cat={item} onPress={() => openCat(item.id)} />}
+      renderItem={({ item }) => (
+        <CatTile
+          cat={item}
+          onPress={() => openCat(item.id)}
+          onShare={() => router.push({ pathname: '/share-pick', params: { catId: String(item.id), tab } })}
+        />
+      )}
       numColumns={2}
       ItemSeparatorComponent={RowGap}
       onContentSizeChange={(_, h) => setContentHeight(h)}

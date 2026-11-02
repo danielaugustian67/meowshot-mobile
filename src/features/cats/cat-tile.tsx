@@ -1,39 +1,49 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
 import { Image as NativeImage, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { LOW_MEMORY } from '@/constants/device';
-import { Fonts, Pastels, Spacing } from '@/constants/theme';
+import { Fonts, PaperInk, Pastels, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { CollectionCat, Sighting } from '@/lib/api/types';
 import { catName, daysAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 
-// A slight, fixed tilt per cat, like photos stuck on a fridge.
+// A slight, fixed tilt per cat, like prints stuck on a fridge.
 const TILTS = ['-1.5deg', '1deg', '0deg', '1.5deg', '-1deg'];
 
+// Seven motifs against nine paper colours: neither count divides the other, so neighbours never match.
+const MOTIFS = [
+  require('@/assets/images/motif-paw.png'),
+  require('@/assets/images/motif-fish.png'),
+  require('@/assets/images/motif-dots.png'),
+  require('@/assets/images/motif-heart.png'),
+  require('@/assets/images/motif-cat.png'),
+  require('@/assets/images/motif-stripes.png'),
+  require('@/assets/images/motif-star.png'),
+];
+
 /**
- * One cat in a collection, framed like a polaroid: cover, name and, for your own cats, when and where it
- * was last seen. `style` replaces the half-row grid sizing, e.g. with a fixed width in a carousel.
- * Only your own cats take `onPress`: the server shows a cat's page to its owner alone.
+ * One cat in a collection, printed like a photobooth frame on the cat's patterned paper: cover, name and, for
+ * your own cats, a stamp of when and where it was last seen. `style` replaces the half-row grid sizing, e.g. with a fixed width in a carousel.
+ * Only your own cats take `onPress` and `onShare`: the server shows a cat's page and photos to its owner alone.
  */
 export function CatTile({
   cat,
   style,
   onPress,
+  onShare,
 }: {
   cat: CollectionCat & { last_sighting?: Sighting | null };
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  onShare?: () => void;
 }) {
   const theme = useTheme();
   const t = useT();
   const seen = cat.last_sighting;
   const frame = Pastels[cat.id % Pastels.length];
   const tilt = TILTS[cat.id % TILTS.length];
-  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   return (
     <Pressable
       accessibilityRole={onPress ? 'link' : undefined}
@@ -41,12 +51,8 @@ export function CatTile({
       disabled={!onPress}
       onPress={onPress}
       style={({ pressed }) => [styles.tile, style, pressed && styles.pressed]}>
-      {/* The page colour under the 25% wash, so the paw pattern does not show through the card. */}
-      <View
-        // Only the beads need the size, and low-memory phones go without them.
-        onLayout={LOW_MEMORY ? undefined : (e) => setSize(e.nativeEvent.layout)}
-        style={[styles.card, { backgroundColor: theme.background, transform: [{ rotate: tilt }] }]}>
-        <View style={[StyleSheet.absoluteFill, styles.wash, { backgroundColor: `${frame}40`, borderColor: frame }]} />
+      <View style={[styles.card, { backgroundColor: frame, transform: [{ rotate: tilt }] }]}>
+        <PaperMotif id={cat.id} />
         <View style={[styles.cover, { backgroundColor: theme.backgroundElement }]}>
           {cat.cover?.thumb_url ? (
             <Image
@@ -78,90 +84,88 @@ export function CatTile({
               accessibilityLabel={t.cats.favorite}
             />
           ) : null}
+          {onShare && cat.photo_count > 0 ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t.share.shareCat(catName(cat.name))}
+              onPress={onShare}
+              hitSlop={6}
+              style={({ pressed }) => [styles.share, pressed && styles.pressed]}>
+              <SymbolView
+                name={{ ios: 'square.and.arrow.up', android: 'share', web: 'share' }}
+                size={18}
+                tintColor="#ffffff"
+              />
+            </Pressable>
+          ) : null}
         </View>
         <View style={styles.caption}>
           <ThemedText type="smallBold" numberOfLines={1} style={styles.name}>
             {catName(cat.name)}
           </ThemedText>
           {seen ? (
-            <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
+            <ThemedText type="small" numberOfLines={1} style={styles.stamp}>
               {seen.label ? `${daysAgo(seen.seen_at)} · ${seen.label}` : daysAgo(seen.seen_at)}
             </ThemedText>
           ) : null}
-        </View>
-        {size ? <BorderPaws width={size.width} height={size.height} color={frame} /> : null}
-        <View style={[styles.sticker, { backgroundColor: frame, borderColor: theme.background }]}>
-          <SymbolView name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} size={14} tintColor="#ffffff" />
+          <BoothMark />
         </View>
       </View>
     </Pressable>
   );
 }
 
-const BEAD_PAW = require('@/assets/images/paw-bead.png');
-
 /**
- * Little paw beads strung along the frame line, evenly spaced on each straight edge. A card has a dozen or
- * more, so each paw is the same small bitmap rather than a symbol view of its own.
+ * The cat's motif printed across its paper, in white so dark ink on top stays readable. Render it first in the
+ * card. Each motif is one small bitmap shared by every card that uses it.
  */
-export function BorderPaws({ width, height, color }: { width: number; height: number; color: string }) {
-  // Centre of the 3pt border line, measured from the card edge.
-  const line = BORDER / 2;
-  const beads: { x: number; y: number }[] = [];
-  const edge = (length: number, at: (offset: number) => { x: number; y: number }) => {
-    // Corners are rounded, so beads stay on the straight part between them.
-    const run = length - 2 * RADIUS;
-    const count = Math.max(1, Math.round(run / PAW_SPACING));
-    for (let i = 0; i < count; i++) beads.push(at(RADIUS + ((i + 0.5) * run) / count));
-  };
-  edge(width, (x) => ({ x, y: line }));
-  edge(width, (x) => ({ x, y: height - line }));
-  edge(height, (y) => ({ x: line, y }));
-  edge(height, (y) => ({ x: width - line, y }));
+export function PaperMotif({ id }: { id: number }) {
   return (
-    <>
-      {beads.map((b, i) => (
-        <View
-          key={i}
-          style={[
-            styles.bead,
-            {
-              left: b.x - BEAD / 2,
-              top: b.y - BEAD / 2,
-              backgroundColor: color,
-              // Alternate the angle so the prints look like steps, not a printed row.
-              transform: [{ rotate: i % 2 ? '20deg' : '-20deg' }],
-            },
-          ]}>
-          <NativeImage source={BEAD_PAW} style={styles.beadPaw} />
-        </View>
-      ))}
-    </>
+    <View style={styles.paper}>
+      {/* An Image without its own size takes the tile's size, so it fills a sized wrapper instead. */}
+      <NativeImage source={MOTIFS[id % MOTIFS.length]} resizeMode="repeat" style={styles.motif} />
+    </View>
   );
 }
 
-const RADIUS = 20;
-const INSET = Spacing.two;
-const BORDER = 3;
-const BEAD = 16;
-const PAW_SPACING = 36;
+/** The booth's name along the bottom edge of a print. Decoration, so screen readers skip it. */
+export function BoothMark() {
+  return (
+    <ThemedText accessibilityElementsHidden importantForAccessibility="no" style={styles.mark}>
+      MEOWSHOT
+    </ThemedText>
+  );
+}
+
+const PAPER_RADIUS = 4;
 
 const styles = StyleSheet.create({
   // Exactly half the row, so a lone tile in the last row keeps the same size as the others.
   tile: { flex: 1, maxWidth: '50%', paddingHorizontal: Spacing.three / 2 },
   pressed: { opacity: 0.8 },
-  card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: INSET },
-  wash: { borderRadius: RADIUS, borderCurve: 'continuous', borderWidth: BORDER },
+  card: { borderRadius: PAPER_RADIUS, padding: Spacing.two },
+  paper: { ...StyleSheet.absoluteFill, borderRadius: PAPER_RADIUS, overflow: 'hidden', pointerEvents: 'none' },
+  motif: { width: '100%', height: '100%', opacity: 0.5 },
   cover: {
     aspectRatio: 1,
-    borderRadius: RADIUS - INSET,
-    borderCurve: 'continuous',
+    borderRadius: 2,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  caption: { paddingTop: Spacing.two, paddingHorizontal: Spacing.one, paddingBottom: Spacing.one },
-  name: { fontFamily: Fonts.rounded, fontSize: 15 },
+  caption: { paddingTop: Spacing.two, paddingHorizontal: Spacing.half, paddingBottom: Spacing.half },
+  name: { color: PaperInk, fontFamily: Fonts.rounded, fontSize: 15 },
+  stamp: { color: PaperInk, fontFamily: Fonts.mono, fontSize: 11, lineHeight: 16 },
+  mark: {
+    color: PaperInk,
+    fontFamily: Fonts.mono,
+    fontSize: 9,
+    lineHeight: 12,
+    letterSpacing: 2,
+    textAlign: 'center',
+    opacity: 0.7,
+    paddingTop: Spacing.two,
+  },
   // Always dark behind white text, so it reads on any photo in both themes.
   badge: {
     position: 'absolute',
@@ -172,28 +176,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
   badgeText: { color: '#ffffff' },
+  share: {
+    position: 'absolute',
+    right: Spacing.one,
+    bottom: Spacing.one,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
   favorite: { position: 'absolute', top: Spacing.two, right: Spacing.two },
-  bead: {
-    position: 'absolute',
-    width: BEAD,
-    height: BEAD,
-    borderRadius: BEAD / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    pointerEvents: 'none',
-  },
-  beadPaw: { width: 9, height: 9 },
-  // A round paw "sticker" stuck over the top-left corner of the frame.
-  sticker: {
-    position: 'absolute',
-    top: -8,
-    left: -8,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: [{ rotate: '-15deg' }],
-  },
 });

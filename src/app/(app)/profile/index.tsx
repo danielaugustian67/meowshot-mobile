@@ -78,7 +78,7 @@ export default function ProfileScreen() {
   );
 }
 
-/** Your Kucingku polaroids in a sideways row, with a link to the full collection. */
+/** Your Kucingku prints in a sideways row, with a link to the full collection. */
 function MyCollection({ count }: { count: number }) {
   const t = useT();
   const { openCat } = useStackLinks();

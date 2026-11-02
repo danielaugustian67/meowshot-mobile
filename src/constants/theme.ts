@@ -41,7 +41,20 @@ export const Colors = {
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 /** Pastel frame colours that read on both the off-white and the black page. Pick one with `id % Pastels.length`. */
-export const Pastels = ['#FFB37A', '#F7A8C4', '#8FD6AE', '#9EC2F5', '#F5D46E', '#C5B0F5'] as const;
+export const Pastels = [
+  '#FFB37A',
+  '#F7A8C4',
+  '#8FD6AE',
+  '#9EC2F5',
+  '#F5D46E',
+  '#C5B0F5',
+  '#FF9E9E',
+  '#7FD8D8',
+  '#C9E27A',
+] as const;
+
+/** Printing on pastel paper: dark in both themes, because the paper does not change with them. */
+export const PaperInk = '#2B2622';
 
 export const Fonts = Platform.select({
   ios: {

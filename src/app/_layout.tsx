@@ -1,6 +1,8 @@
-import { QueryClientProvider } from '@tanstack/react-query';
+import { useIsRestoring } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -8,6 +10,7 @@ import { SessionProvider, useSession } from '@/lib/auth/session';
 import { useT } from '@/lib/i18n';
 import { loadPrefs, usePrefsReady } from '@/lib/prefs';
 import { queryClient } from '@/lib/query';
+import { persistOptions } from '@/lib/query-persist';
 
 SplashScreen.preventAutoHideAsync();
 loadPrefs();
@@ -15,13 +18,15 @@ loadPrefs();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       <SessionProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          {/* Follows the theme chosen in Settings. The camera mounts its own light one on top while it is open. */}
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
           <RootNavigator />
         </ThemeProvider>
       </SessionProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
 
@@ -29,9 +34,10 @@ function RootNavigator() {
   const { status } = useSession();
   const prefsReady = usePrefsReady();
   const t = useT();
-  const loading = status === 'loading' || !prefsReady;
+  const restoring = useIsRestoring();
+  const loading = status === 'loading' || !prefsReady || restoring;
 
-  // Keep the splash screen up until the stored tokens and settings have been read.
+  // Keep the splash screen up until the stored tokens, settings and lists have been read.
   useEffect(() => {
     if (!loading) SplashScreen.hideAsync();
   }, [loading]);
@@ -50,6 +56,8 @@ function RootNavigator() {
             sheetCornerRadius: 24,
           }}
         />
+        <Stack.Screen name="share-pick" options={{ headerShown: true, title: t.share.pickTitle, presentation: 'modal' }} />
+        <Stack.Screen name="share-photo" options={{ headerShown: true, title: t.share.title, presentation: 'modal' }} />
         <Stack.Screen
           name="edit-cat"
           options={{
@@ -64,6 +72,7 @@ function RootNavigator() {
       <Stack.Protected guard={status === 'signedOut'}>
         <Stack.Screen name="sign-in" />
         <Stack.Screen name="sign-up" options={{ headerShown: true, title: t.auth.signUpTitle }} />
+        <Stack.Screen name="verify-email" options={{ headerShown: true, title: t.auth.verifyTitle }} />
         <Stack.Screen name="forgot-password" options={{ headerShown: true, title: t.auth.forgotTitle }} />
         <Stack.Screen name="reset-password" options={{ headerShown: true, title: t.auth.resetTitle }} />
       </Stack.Protected>

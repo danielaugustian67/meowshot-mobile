@@ -37,7 +37,8 @@ export function setSessionEndedHandler(fn: (() => void) | null) {
 }
 
 export function tokensFrom(res: TokenResponse): Tokens {
-  return { access: res.access_token, refresh: res.refresh_token };
+  // Counted from the device's clock rather than read from the token, so a wrong clock cannot refresh on every request.
+  return { access: res.access_token, refresh: res.refresh_token, expiresAt: Date.now() + res.expires_in * 1000 };
 }
 
 function buildURL(path: string, query?: Query) {
@@ -105,10 +106,23 @@ function refreshTokens(): Promise<boolean> {
   return refreshing;
 }
 
+// A little early, so a request does not expire on its way to the server.
+const REFRESH_MARGIN_MS = 30_000;
+
+/**
+ * Refreshes before a known-expired token is sent. Opening the app fires several requests at once, and otherwise
+ * each would first bounce off a 401. If this fails, the request goes out anyway and reports its own error.
+ */
+async function refreshIfExpiring() {
+  const expiresAt = getTokens()?.expiresAt;
+  if (expiresAt && expiresAt - Date.now() < REFRESH_MARGIN_MS) await refreshTokens().catch(() => false);
+}
+
 export async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   if (opts.auth === false) return parse<T>(await send(path, opts));
 
-  if (refreshing) await refreshing;
+  if (refreshing) await refreshing.catch(() => false);
+  await refreshIfExpiring();
   const used = getTokens()?.access;
   if (!used) throw new ApiError(401, 'unauthorized', 'Belum login');
   let res = await send(path, opts, used);

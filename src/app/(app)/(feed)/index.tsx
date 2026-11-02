@@ -71,7 +71,8 @@ function ScopeSwitch({ value, onChange }: { value: Scope; onChange: (scope: Scop
 }
 
 const styles = StyleSheet.create({
-  switch: { flexDirection: 'row', padding: 3, borderRadius: 20, gap: 2 },
+  // The Android header stretches its title to the bell button, so hug the two options instead.
+  switch: { alignSelf: 'flex-start', flexDirection: 'row', padding: 3, borderRadius: 20, gap: 2 },
   option: {
     flexDirection: 'row',
     alignItems: 'center',

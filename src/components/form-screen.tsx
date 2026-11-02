@@ -8,12 +8,16 @@ import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 /** Scrollable, keyboard-aware column for auth and settings forms. */
-export function FormScreen({ children }: PropsWithChildren) {
+export function FormScreen({ children, noHeader }: PropsWithChildren<{ noHeader?: boolean }>) {
   const theme = useTheme();
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.grow} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          // The iOS header floats over the content.
+          contentInsetAdjustmentBehavior={noHeader ? 'never' : 'automatic'}
+          contentContainerStyle={styles.grow}
+          keyboardShouldPersistTaps="handled">
           <PawPattern inScroll />
           <View style={styles.content}>{children}</View>
         </ScrollView>

@@ -25,6 +25,9 @@ export const queryClient = new QueryClient({
   },
 });
 
+// What the first screens show is kept on the device for this long; see query-persist.ts.
+export const PERSIST_MAX_AGE = 7 * 24 * 60 * 60_000;
+
 export type FeedScope = 'friends' | 'public';
 
 export const queryKeys = {
@@ -62,3 +65,16 @@ export const queryKeys = {
   // Under `users`, so blocking from anywhere refetches it.
   blocks: ['users', 'blocks'] as const,
 };
+
+// Restored lists have to outlive a session in which their tab is never opened, or the next save would drop them.
+const TAB_QUERIES = [
+  queryKeys.me,
+  queryKeys.catList,
+  queryKeys.catMap,
+  queryKeys.posts('friends'),
+  queryKeys.posts('public'),
+  queryKeys.friends,
+];
+for (const queryKey of TAB_QUERIES) {
+  queryClient.setQueryDefaults(queryKey, { gcTime: PERSIST_MAX_AGE });
+}

@@ -19,6 +19,7 @@ import type {
   Me,
   NearbyCat,
   Page,
+  PendingSignup,
   Photo,
   Post,
   Profile,
@@ -64,7 +65,12 @@ async function photoForm(file: UploadFile, fields: Record<string, string | numbe
 
 export const authApi = {
   register: (body: { email: string; password: string; username: string; invite_code?: string }) =>
-    request<TokenResponse>('/auth/register', { method: 'POST', body, auth: false }),
+    request<PendingSignup>('/auth/register', { method: 'POST', body, auth: false }),
+  /** Creates the account, so this is what signs the user in. */
+  verifyRegistration: (body: { verification_id: string; code: string }) =>
+    request<TokenResponse>('/auth/register/verify', { method: 'POST', body, auth: false }),
+  resendRegistrationCode: (verification_id: string) =>
+    request<void>('/auth/register/resend', { method: 'POST', body: { verification_id }, auth: false }),
   /** `email` also accepts a username. */
   login: (body: { email: string; password: string }) =>
     request<TokenResponse>('/auth/login', { method: 'POST', body, auth: false }),

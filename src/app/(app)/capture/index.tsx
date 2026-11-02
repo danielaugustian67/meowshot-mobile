@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { DraftLocation } from '@/features/capture/draft';
-import { currentLocation } from '@/features/capture/media';
+import { currentLocation, fixWithin } from '@/features/capture/media';
 import { pickFromSystemLibrary, startDraft } from '@/features/capture/prepare';
 import { useT } from '@/lib/i18n';
 
@@ -34,6 +34,8 @@ async function latestPhoto(): Promise<string | null> {
 
 // Comfortably above the 1600 px upload size (compressPhoto), far below full sensor resolution.
 const ANDROID_PICTURE_SIZE = '2048x1536';
+// The search began when the camera opened. With no GPS signal it runs for about 30 s, too long to hold up the shutter.
+const LOCATION_WAIT_MS = 3000;
 
 export default function CameraScreen() {
   const camera = useRef<CameraView>(null);
@@ -65,7 +67,7 @@ export default function CameraScreen() {
   useEffect(() => {
     // Start the GPS fix while the user frames the shot, so the shutter does not wait for it.
     // Only once the camera is allowed, so the location prompt never comes first.
-    if (focused && cameraAllowed) locating.current = currentLocation();
+    if (focused && cameraAllowed) locating.current = currentLocation({ askToEnable: false });
   }, [focused, cameraAllowed]);
 
   async function shoot() {
@@ -73,8 +75,9 @@ export default function CameraScreen() {
     setError(null);
     setBusy(true);
     try {
-      const picture = await camera.current.takePictureAsync({ quality: 1 });
-      await startDraft(picture, 'camera', await (locating.current ?? currentLocation()), null);
+      const picture = await camera.current.takePictureAsync({ quality: 1, shutterSound: false });
+      const fix = locating.current ?? currentLocation({ askToEnable: false });
+      await startDraft(picture, 'camera', await fixWithin(fix, LOCATION_WAIT_MS), null);
     } catch {
       setError(t.capture.shootFailed);
     } finally {

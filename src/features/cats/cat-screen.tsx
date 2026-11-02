@@ -21,10 +21,9 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/section-title';
-import { LOW_MEMORY } from '@/constants/device';
 import { LeanList } from '@/constants/list';
-import { Fonts, Pastels, Spacing } from '@/constants/theme';
-import { useStackLinks } from '@/hooks/use-stack-links';
+import { Fonts, PaperInk, Pastels, Spacing } from '@/constants/theme';
+import { sharePhotoHref, useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import { catsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
@@ -33,15 +32,15 @@ import { catName, daysAgo, timeAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 import { queryClient, queryKeys } from '@/lib/query';
 
-import { BorderPaws } from './cat-tile';
+import { BoothMark, PaperMotif } from './cat-tile';
 import { catChanged, useCat, useCatPhotos, useCatSightings } from './queries';
 
 const COLUMNS = 3;
 const GAP = Spacing.one;
 
 /**
- * One of your cats: a big polaroid of the cover, what you know about them, where they were seen and every photo.
- * Photos can become the cover or open the post they were shared in; the pencil edits the name and notes.
+ * One of your cats: a big photobooth print of the cover, what you know about them, where they were seen and every photo.
+ * Photos can become the cover, be shared, or open the post they were shared in; the pencil edits the name and notes.
  */
 export default function CatScreen() {
   const theme = useTheme();
@@ -142,19 +141,15 @@ export default function CatScreen() {
   );
 }
 
-/** The cover as a large polaroid in the cat's pastel, with the favourite heart on the photo. */
+/** The cover as a large photobooth print on the cat's patterned paper, with the favourite heart on the photo. */
 function Hero({ cat }: { cat: Cat }) {
   const theme = useTheme();
   const t = useT();
   const frame = Pastels[cat.id % Pastels.length];
-  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const cover = cat.cover;
   return (
-    <View
-      // Only the beads need the size, and low-memory phones go without them.
-      onLayout={LOW_MEMORY ? undefined : (e) => setSize(e.nativeEvent.layout)}
-      style={[styles.hero, { backgroundColor: theme.background }]}>
-      <View style={[StyleSheet.absoluteFill, styles.wash, { backgroundColor: `${frame}40`, borderColor: frame }]} />
+    <View style={[styles.hero, { backgroundColor: frame }]}>
+      <PaperMotif id={cat.id} />
       <View style={[styles.cover, { backgroundColor: theme.backgroundElement }]}>
         {cover?.url ? (
           <Image
@@ -179,10 +174,7 @@ function Hero({ cat }: { cat: Cat }) {
       <ThemedText numberOfLines={2} style={styles.heroName}>
         {catName(cat.name)}
       </ThemedText>
-      {size ? <BorderPaws width={size.width} height={size.height} color={frame} /> : null}
-      <View style={[styles.sticker, { backgroundColor: frame, borderColor: theme.background }]}>
-        <SymbolView name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} size={18} tintColor="#ffffff" />
-      </View>
+      <BoothMark />
     </View>
   );
 }
@@ -328,7 +320,7 @@ function SightingRow({ sighting, divider }: { sighting: Sighting; divider: boole
 function PhotoTile({ photo, cat, size }: { photo: Photo; cat: Cat; size: number }) {
   const theme = useTheme();
   const t = useT();
-  const { openPost } = useStackLinks();
+  const { openPost, tab } = useStackLinks();
   const isCover = cat.cover?.photo_id === photo.id;
   const postId = photo.post_id;
 
@@ -342,7 +334,7 @@ function PhotoTile({ photo, cat, size }: { photo: Photo; cat: Cat; size: number 
 
   const actions = [
     ...(isCover ? [] : [{ label: t.cats.makeCover, run: makeCover }]),
-    ...(postId ? [{ label: t.cats.viewPost, run: () => openPost(postId) }] : []),
+    postId ? { label: t.cats.viewPost, run: () => openPost(postId) } : { label: t.capture.share, run: () => router.push(sharePhotoHref(photo, tab)) },
   ];
 
   function openMenu() {
@@ -389,11 +381,6 @@ function PhotoTile({ photo, cat, size }: { photo: Photo; cat: Cat; size: number 
   );
 }
 
-// Matches CatTile, whose BorderPaws keep to the straight edges between corners of this radius.
-const RADIUS = 20;
-const INSET = Spacing.three;
-const BORDER = 3;
-
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   error: { gap: Spacing.three, padding: Spacing.four },
@@ -405,21 +392,19 @@ const styles = StyleSheet.create({
     width: '80%',
     maxWidth: 360,
     marginTop: Spacing.two,
-    borderRadius: RADIUS,
-    borderCurve: 'continuous',
-    padding: INSET,
+    borderRadius: 4,
+    padding: Spacing.three,
     transform: [{ rotate: '-1deg' }],
   },
-  wash: { borderRadius: RADIUS, borderCurve: 'continuous', borderWidth: BORDER },
   cover: {
     aspectRatio: 1,
-    borderRadius: RADIUS - INSET / 2,
-    borderCurve: 'continuous',
+    borderRadius: 2,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
   heroName: {
+    color: PaperInk,
     fontFamily: Fonts.rounded,
     fontSize: 28,
     lineHeight: 34,
@@ -427,19 +412,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingTop: Spacing.three,
     paddingBottom: Spacing.one,
-  },
-  // A round paw "sticker" stuck over the top-left corner, as on the tiles but bigger.
-  sticker: {
-    position: 'absolute',
-    top: -10,
-    left: -10,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: [{ rotate: '-15deg' }],
   },
   // Always dark behind the white heart, so it reads on any photo in both themes.
   favorite: {

@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 
 import { FormError, FormScreen } from '@/components/form-screen';
@@ -7,14 +8,12 @@ import { TextField } from '@/components/ui/text-field';
 import { ApiError } from '@/lib/api/client';
 import { authApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
-import { useSession } from '@/lib/auth/session';
 import { useT } from '@/lib/i18n';
 
 // Same rule as the server (mewshot-be auth_handlers.go usernameRe).
 const USERNAME_RE = /^[a-z0-9_.]{3,30}$/;
 
 export default function SignUpScreen() {
-  const { signIn } = useSession();
   const t = useT();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -49,9 +48,10 @@ export default function SignUpScreen() {
         password,
         invite_code: invite.trim() || undefined,
       });
-      await signIn(res);
+      router.push({ pathname: '/verify-email', params: { id: res.verification_id, email: res.email } });
     } catch (e) {
       showError(e);
+    } finally {
       setBusy(false);
     }
   }

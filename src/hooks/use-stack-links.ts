@@ -1,13 +1,42 @@
 import { router, useSegments } from 'expo-router';
 
+import type { Photo } from '@/lib/api/types';
+
+export type StackTab = 'profile' | 'cats' | 'feed';
+
+/** The post screen in a tab's own stack. */
+export function postHref(tab: StackTab, id: number) {
+  const params = { id: String(id) };
+  return tab === 'profile'
+    ? { pathname: '/profile/post/[id]' as const, params }
+    : tab === 'cats'
+      ? { pathname: '/cats/post/[id]' as const, params }
+      : { pathname: '/post/[id]' as const, params };
+}
+
+/** The share screen for a photo from the collection, whose post opens in `tab`. */
+export function sharePhotoHref(photo: Photo, tab: StackTab) {
+  return {
+    pathname: '/share-photo' as const,
+    params: {
+      catId: String(photo.cat_id),
+      photoId: String(photo.id),
+      photoUri: photo.url ?? photo.thumb_url ?? '',
+      ratio: String(photo.width / photo.height),
+      tab,
+    },
+  };
+}
+
 /**
  * Opens a profile, a post or one of your cats on top of the current tab, so Back returns to where it was tapped.
  * The Feed, Kucingku and Profil stacks each route all three screens; the Foto tab falls back to Feed.
  */
 export function useStackLinks() {
   const segments = useSegments() as string[];
-  const tab = segments.includes('profile') ? 'profile' : segments.includes('cats') ? 'cats' : 'feed';
+  const tab: StackTab = segments.includes('profile') ? 'profile' : segments.includes('cats') ? 'cats' : 'feed';
   return {
+    tab,
     openProfile: (username: string) => {
       const params = { username };
       router.push(
@@ -18,16 +47,7 @@ export function useStackLinks() {
             : { pathname: '/user/[username]', params },
       );
     },
-    openPost: (id: number) => {
-      const params = { id: String(id) };
-      router.push(
-        tab === 'profile'
-          ? { pathname: '/profile/post/[id]', params }
-          : tab === 'cats'
-            ? { pathname: '/cats/post/[id]', params }
-            : { pathname: '/post/[id]', params },
-      );
-    },
+    openPost: (id: number) => router.push(postHref(tab, id)),
     openCat: (id: number) => {
       const params = { id: String(id) };
       router.push(
