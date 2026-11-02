@@ -51,13 +51,15 @@ function dropFromCache(userId: number) {
   });
 }
 
-/** Everything a block or unblock changes: feeds, comments, profiles, friends. */
+/** Everything a block or unblock changes: feeds, comments, profiles, friends, notifications. */
 function refetchAfterBlock() {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: queryKeys.postsAll }),
     queryClient.invalidateQueries({ queryKey: queryKeys.commentsAll }),
     queryClient.invalidateQueries({ queryKey: queryKeys.users }),
     queryClient.invalidateQueries({ queryKey: queryKeys.friends }),
+    // The server deletes notifications between the two of you.
+    queryClient.invalidateQueries({ queryKey: queryKeys.notificationsAll }),
   ]);
 }
 

@@ -51,6 +51,10 @@ export const queryKeys = {
   /** Prefix for every comment list. */
   commentsAll: ['comments'] as const,
   comments: (postId: number) => ['comments', postId] as const,
+  /** Prefix for the notification list and the unread count. */
+  notificationsAll: ['notifications'] as const,
+  notifications: ['notifications', 'list'] as const,
+  unreadCount: ['notifications', 'unread'] as const,
   // Under `users`, so blocking from anywhere refetches it.
   blocks: ['users', 'blocks'] as const,
 };

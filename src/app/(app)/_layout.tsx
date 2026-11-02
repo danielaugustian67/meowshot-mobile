@@ -1,6 +1,7 @@
 import { NativeTabs } from 'expo-router/native-tabs';
 import { useState } from 'react';
 
+import { badgeText, useUnreadCount } from '@/features/notifications/queries';
 import { TabBarContext } from '@/hooks/use-hide-tab-bar';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/lib/i18n';
@@ -10,6 +11,7 @@ export default function AppTabs() {
   const theme = useTheme();
   const t = useT();
   const [tabBarHidden, setTabBarHidden] = useState(false);
+  const unread = useUnreadCount();
   return (
     <TabBarContext value={{ setTabBarHidden }}>
       <NativeTabs
@@ -21,6 +23,9 @@ export default function AppTabs() {
         <NativeTabs.Trigger name="(feed)">
           <NativeTabs.Trigger.Label>{t.tabs.feed}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
+          {/* The bell lives in the Feed header, so the count shows on this tab from anywhere. */}
+          {/* `hidden` alone leaves a "0" on iOS; with no text the badge goes away. */}
+          <NativeTabs.Trigger.Badge hidden={!unread}>{unread ? badgeText(unread) : undefined}</NativeTabs.Trigger.Badge>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="capture">
           <NativeTabs.Trigger.Label>{t.tabs.capture}</NativeTabs.Trigger.Label>

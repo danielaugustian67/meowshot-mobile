@@ -17,6 +17,16 @@ export function daysAgo(iso: string, now = Date.now()): string {
   return t.years(Math.floor(days / 365));
 }
 
+/** "just now", "5 min ago", "3 hours ago" within a day, then the same as daysAgo. */
+export function timeAgo(iso: string, now = Date.now()): string {
+  const t = strings().time;
+  const minutes = Math.floor((now - new Date(iso).getTime()) / 60_000);
+  if (minutes < 1) return t.justNow;
+  if (minutes < 60) return t.minutes(minutes);
+  if (minutes < 24 * 60) return t.hours(Math.floor(minutes / 60));
+  return daysAgo(iso, now);
+}
+
 export function distance(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1).replace('.', strings().format.decimal)} km`;
 }

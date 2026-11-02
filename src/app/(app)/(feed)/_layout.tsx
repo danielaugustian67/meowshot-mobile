@@ -9,6 +9,7 @@ export default function FeedLayout() {
     <Stack screenOptions={{ headerShadowVisible: false, headerBackButtonDisplayMode: 'minimal' }}>
       {/* The title is the Teman/Publik switch, set by the screen itself. */}
       <Stack.Screen name="index" options={{ title: t.tabs.feed }} />
+      <Stack.Screen name="notifications" options={{ title: t.notifications.title }} />
     </Stack>
   );
 }
