@@ -80,6 +80,21 @@ const id = {
     photoAlt: (name: string) => `Foto ${name}`,
     snappedBy: (username: string) => `dipotret @${username}`,
   },
+  reactions: {
+    add: 'Kasih reaksi',
+  },
+  comments: {
+    open: 'Lihat komentar',
+    write: 'Komentari',
+    title: 'Komentar',
+    placeholder: 'Bilang sesuatu ke si meong…',
+    send: 'Kirim',
+    empty: 'Belum ada komentar. Jadi yang pertama! 🐾',
+    disabled: 'Komentar dimatikan untuk post ini.',
+    delete: 'Hapus',
+    deleteConfirm: 'Hapus komentar ini?',
+    more: 'Muat komentar lainnya',
+  },
   cats: {
     emptyTitle: 'Belum ada kucing',
     emptyBody: 'Foto kucing pertamamu di tab Foto.',
@@ -307,6 +322,21 @@ const en: Strings = {
     comments: (n: number) => (n === 1 ? '1 comment' : `${n} comments`),
     photoAlt: (name: string) => `Photo of ${name}`,
     snappedBy: (username: string) => `snapped by @${username}`,
+  },
+  reactions: {
+    add: 'Add a reaction',
+  },
+  comments: {
+    open: 'View comments',
+    write: 'Comment',
+    title: 'Comments',
+    placeholder: 'Say something to the kitty…',
+    send: 'Send',
+    empty: 'No comments yet. Be the first! 🐾',
+    disabled: 'Comments are turned off for this post.',
+    delete: 'Delete',
+    deleteConfirm: 'Delete this comment?',
+    more: 'Load more comments',
   },
   cats: {
     emptyTitle: 'No cats yet',

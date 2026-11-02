@@ -7,24 +7,34 @@ import { ThemedText } from '@/components/themed-text';
 import { Fonts, Pastels, Spacing } from '@/constants/theme';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
-import { REACTIONS, type Post } from '@/lib/api/types';
+import type { Post } from '@/lib/api/types';
 import { catName, daysAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
+
+import { ReactionBar } from './reaction-bar';
 
 const AVATAR = 22;
 
 /**
  * One post in the feed, drawn as a cat's head: a pastel frame with two ears on top, the cat's name as the
- * title, its photo, then who snapped it, reactions and caption. Tapping the author opens their profile.
+ * title, its photo, then who snapped it, caption and reactions. Tapping the author opens their profile.
  */
-export function PostCard({ post, linkAuthor = true }: { post: Post; linkAuthor?: boolean }) {
+export function PostCard({
+  post,
+  linkAuthor = true,
+  onComment,
+}: {
+  post: Post;
+  linkAuthor?: boolean;
+  /** What the comment button does; by default it opens the post, where the comments are. */
+  onComment?: () => void;
+}) {
   const theme = useTheme();
   const t = useT();
-  const { openProfile } = useStackLinks();
+  const { openProfile, openPost } = useStackLinks();
   const photo = post.photos[0];
   const name = catName(post.cat.name);
   const place = post.location?.label;
-  const reactions = REACTIONS.filter((r) => post.reaction_counts[r]);
   const frame = Pastels[post.id % Pastels.length];
   // Very tall or very wide photos are cropped, so one post never fills more than a screen.
   const ratio = photo?.width && photo.height ? Math.min(Math.max(photo.width / photo.height, 0.8), 1.91) : 1;
@@ -88,30 +98,7 @@ export function PostCard({ post, linkAuthor = true }: { post: Post; linkAuthor?:
 
           {post.caption ? <ThemedText>{post.caption}</ThemedText> : null}
 
-          {reactions.length > 0 || post.comment_count > 0 ? (
-            <View style={styles.stats}>
-              {reactions.map((r) => (
-                <View
-                  key={r}
-                  style={[
-                    styles.chip,
-                    {
-                      backgroundColor: theme.background,
-                      borderColor: post.my_reaction === r ? theme.tint : frame,
-                    },
-                  ]}>
-                  <ThemedText type="small">
-                    {r} {post.reaction_counts[r]}
-                  </ThemedText>
-                </View>
-              ))}
-              {post.comment_count > 0 ? (
-                <ThemedText type="small" themeColor="textSecondary" style={styles.comments}>
-                  💬 {t.feed.comments(post.comment_count)}
-                </ThemedText>
-              ) : null}
-            </View>
-          ) : null}
+          <ReactionBar post={post} frame={frame} onComment={onComment ?? (() => openPost(post.id))} />
         </View>
       </View>
     </View>
@@ -166,7 +153,4 @@ const styles = StyleSheet.create({
   body: { gap: Spacing.two, paddingHorizontal: Spacing.two, paddingBottom: Spacing.two },
   author: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   authorText: { flex: 1 },
-  stats: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.one },
-  chip: { paddingHorizontal: Spacing.two, paddingVertical: Spacing.half, borderRadius: 12, borderWidth: 1.5 },
-  comments: { marginLeft: Spacing.one },
 });
