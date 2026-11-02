@@ -79,13 +79,13 @@ export function PostList({ scope }: { scope: FeedScope }) {
       ListEmptyComponent={
         scope === 'friends' ? (
           <Placeholder
-            icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }}
+            icon={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }}
             title={t.feed.emptyTitle}
             body={t.feed.emptyFriends}
           />
         ) : (
           <Placeholder
-            icon={{ ios: 'globe', android: 'public', web: 'public' }}
+            icon={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }}
             title={t.feed.emptyTitle}
             body={t.feed.emptyPublic}
           />
@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
   error: { gap: Spacing.three, padding: Spacing.four },
   content: { paddingVertical: Spacing.three },
   empty: { flexGrow: 1 },
-  separator: { height: Spacing.four },
+  // The next card's ears already add space above it.
+  separator: { height: Spacing.three },
   footer: { paddingVertical: Spacing.four },
 });

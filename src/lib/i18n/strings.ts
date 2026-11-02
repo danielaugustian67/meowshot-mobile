@@ -73,11 +73,12 @@ const id = {
   feed: {
     friends: 'Teman',
     public: 'Publik',
-    emptyTitle: 'Belum ada post',
+    emptyTitle: 'Masih sepi, belum ada meong 🐾',
     emptyFriends: 'Post kamu dan temanmu muncul di sini.',
     emptyPublic: 'Post publik dari semua orang muncul di sini.',
     comments: (n: number) => `${n} komentar`,
     photoAlt: (name: string) => `Foto ${name}`,
+    snappedBy: (username: string) => `dipotret @${username}`,
   },
   cats: {
     emptyTitle: 'Belum ada kucing',
@@ -300,11 +301,12 @@ const en: Strings = {
   feed: {
     friends: 'Friends',
     public: 'Public',
-    emptyTitle: 'No posts yet',
+    emptyTitle: 'Quiet here, no kitties yet 🐾',
     emptyFriends: 'Posts from you and your friends show up here.',
     emptyPublic: 'Public posts from everyone show up here.',
     comments: (n: number) => (n === 1 ? '1 comment' : `${n} comments`),
     photoAlt: (name: string) => `Photo of ${name}`,
+    snappedBy: (username: string) => `snapped by @${username}`,
   },
   cats: {
     emptyTitle: 'No cats yet',
