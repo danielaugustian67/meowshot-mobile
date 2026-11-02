@@ -13,7 +13,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { CatOption } from '@/features/capture/cat-option';
 import { updateDraft, useCaptureDraft, type DraftLocation } from '@/features/capture/draft';
-import { currentLocation } from '@/features/capture/media';
+import { currentLocation, placeName } from '@/features/capture/media';
 import { capture, catsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useT, type Strings } from '@/lib/i18n';
@@ -36,7 +36,8 @@ export default function ReviewScreen() {
   const theme = useTheme();
   const t = useT();
   const draft = useCaptureDraft();
-  const [label, setLabel] = useState('');
+  // Null until the user types: the place name follows the location until then.
+  const [typedLabel, setTypedLabel] = useState<string | null>(null);
   const [name, setName] = useState('');
   // A different nickname idea each visit, as a hint that any silly name will do.
   const [nameIdea] = useState(() => t.capture.nameIdeas[Math.floor(Math.random() * t.capture.nameIdeas.length)]);
@@ -51,6 +52,12 @@ export default function ReviewScreen() {
     queryFn: () => catsApi.nearby(loc!.lat, loc!.lng, SUGGEST_RADIUS_M),
     enabled: !!loc,
   });
+  const suggestedLabel = useQuery({
+    queryKey: queryKeys.placeName(loc?.lat ?? 0, loc?.lng ?? 0),
+    queryFn: () => placeName(loc!.lat, loc!.lng),
+    enabled: !!loc,
+  });
+  const label = typedLabel ?? suggestedLabel.data ?? '';
 
   if (!draft) return <Redirect href="/capture" />;
 
@@ -162,7 +169,7 @@ export default function ReviewScreen() {
             label={t.capture.place}
             placeholder={t.capture.placeExample}
             value={label}
-            onChangeText={setLabel}
+            onChangeText={setTypedLabel}
             maxLength={200}
           />
         </View>

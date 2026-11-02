@@ -1,5 +1,6 @@
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as Location from 'expo-location';
+import { Platform } from 'react-native';
 
 import type { DraftLocation } from './draft';
 
@@ -57,6 +58,23 @@ export async function currentLocation({ askToEnable = true } = {}): Promise<Draf
 /** The fix if it arrives within `ms`, otherwise null, for callers that cannot keep the user waiting for GPS. */
 export function fixWithin(fix: Promise<DraftLocation | null>, ms: number): Promise<DraftLocation | null> {
   return Promise.race([fix, new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))]);
+}
+
+/**
+ * A district-level name for a point, or null when the phone's geocoder has none.
+ * Street and building names are left out on purpose: the name ends up on posts.
+ */
+export async function placeName(lat: number, lng: number): Promise<string | null> {
+  try {
+    // Android's geocoder refuses to run without location access, and a suggestion is not worth a prompt.
+    if (Platform.OS === 'android' && !(await Location.getForegroundPermissionsAsync()).granted) return null;
+    const [place] = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+    if (!place) return null;
+    const parts = [place.district || place.city, place.subregion || place.city || place.region];
+    return [...new Set(parts.filter(Boolean))].join(', ') || null;
+  } catch {
+    return null;
+  }
 }
 
 /** Where a typed place is, from the phone's own geocoder, or null when it finds nothing. */

@@ -36,6 +36,7 @@ export const queryKeys = {
   cats: ['cats'] as const,
   catList: ['cats', 'list'] as const,
   nearbyCats: (lat: number, lng: number) => ['cats', 'nearby', lat, lng] as const,
+  placeName: (lat: number, lng: number) => ['place-name', lat, lng] as const,
   cat: (id: number) => ['cats', 'detail', id] as const,
   catPhotos: (id: number) => ['cats', 'photos', id] as const,
   catSightings: (id: number) => ['cats', 'sightings', id] as const,

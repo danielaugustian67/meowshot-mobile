@@ -149,7 +149,7 @@ export default function ShareScreen() {
               onChange={setPicked}
             />
             <ThemedText type="small" themeColor="textSecondary">
-              {p.label ? `📍 ${p.label} · ${precisionHint[precision]}` : precisionHint[precision]}
+              {p.label && precision !== 'HIDDEN' ? `📍 ${p.label} · ${precisionHint[precision]}` : precisionHint[precision]}
             </ThemedText>
             {visibility === 'PUBLIC' && precision === 'EXACT' && point ? (
               <View style={[styles.warning, { borderColor: theme.tint, backgroundColor: theme.backgroundElement }]}>
