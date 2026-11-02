@@ -33,6 +33,7 @@ export default function ProfileLayout() {
       <Stack.Screen name="edit" options={{ title: t.settings.editProfile }} />
       <Stack.Screen name="password" options={{ title: t.settings.changePassword }} />
       <Stack.Screen name="delete-account" options={{ title: t.settings.deleteAccount }} />
+      <Stack.Screen name="blocked" options={{ title: t.moderation.blockedTitle }} />
     </Stack>
   );
 }

@@ -48,5 +48,9 @@ export const queryKeys = {
   // Under `users`, so a friend action refetches it: becoming friends opens the collection.
   userCats: (username: string) => ['users', 'cats', username] as const,
   post: (id: number) => ['posts', 'detail', id] as const,
+  /** Prefix for every comment list. */
+  commentsAll: ['comments'] as const,
   comments: (postId: number) => ['comments', postId] as const,
+  // Under `users`, so blocking from anywhere refetches it.
+  blocks: ['users', 'blocks'] as const,
 };

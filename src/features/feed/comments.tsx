@@ -18,10 +18,12 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/section-title';
 import { Spacing } from '@/constants/theme';
+import { useModeration } from '@/features/moderation/actions';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import { postsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
+import { useMe } from '@/lib/auth/session';
 import type { Comment, Page, Post } from '@/lib/api/types';
 import { daysAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
@@ -78,11 +80,13 @@ export function CommentList({ post }: { post: Post }) {
   );
 }
 
-/** One comment as a speech bubble. Its author, and the post's owner, can delete it. */
+/** One comment as a speech bubble. Its author, and the post's owner, can delete it; anyone else can report it. */
 function CommentRow({ comment }: { comment: Comment }) {
   const theme = useTheme();
   const t = useT();
   const { openProfile } = useStackLinks();
+  const { openMenu } = useModeration();
+  const { data: me } = useMe();
   const [deleting, setDeleting] = useState(false);
 
   function confirmDelete() {
@@ -132,6 +136,16 @@ function CommentRow({ comment }: { comment: Comment }) {
             <Pressable accessibilityRole="button" onPress={confirmDelete} disabled={deleting} hitSlop={8}>
               <ThemedText type="small" themeColor="textSecondary" style={styles.metaText}>
                 {t.comments.delete}
+              </ThemedText>
+            </Pressable>
+          ) : null}
+          {me && me.id !== comment.author.id ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => openMenu('COMMENT', comment.id, comment.author)}
+              hitSlop={8}>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.metaText}>
+                {t.moderation.report}
               </ThemedText>
             </Pressable>
           ) : null}

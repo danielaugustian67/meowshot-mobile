@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Fonts, Pastels, Spacing } from '@/constants/theme';
+import { useModeration } from '@/features/moderation/actions';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import type { Post } from '@/lib/api/types';
@@ -32,6 +33,7 @@ export function PostCard({
   const theme = useTheme();
   const t = useT();
   const { openProfile, openPost } = useStackLinks();
+  const { openMenu } = useModeration();
   const photo = post.photos[0];
   const name = catName(post.cat.name);
   const place = post.location?.label;
@@ -70,6 +72,20 @@ export function PostCard({
               accessibilityLabel={post.visibility === 'PUBLIC' ? t.feed.public : t.feed.friends}
             />
           </View>
+          {post.is_owner ? null : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t.moderation.more}
+              onPress={() => openMenu('POST', post.id, post.author)}
+              hitSlop={8}
+              style={({ pressed }) => [styles.more, { opacity: pressed ? 0.5 : 1 }]}>
+              <SymbolView
+                name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
+                size={18}
+                tintColor={theme.textSecondary}
+              />
+            </Pressable>
+          )}
         </View>
 
         {photo?.url ? (
@@ -149,6 +165,7 @@ const styles = StyleSheet.create({
   headerText: { flex: 1 },
   name: { fontFamily: Fonts.rounded, fontSize: 20, lineHeight: 26, fontWeight: 800 },
   badge: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  more: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
   photo: { width: '100%', borderRadius: RADIUS - INSET, borderCurve: 'continuous' },
   body: { gap: Spacing.two, paddingHorizontal: Spacing.two, paddingBottom: Spacing.two },
   author: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },

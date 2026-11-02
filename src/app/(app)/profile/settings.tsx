@@ -73,6 +73,12 @@ export default function SettingsScreen() {
         </ListCard>
       </ListSection>
 
+      <ListSection title={t.settings.privacy}>
+        <ListCard>
+          <ListRow label={t.moderation.blockedTitle} onPress={() => router.push('/profile/blocked')} />
+        </ListCard>
+      </ListSection>
+
       <ListCard>
         <ListRow label={t.profile.signOut} destructive chevron={false} onPress={confirmSignOut} />
       </ListCard>

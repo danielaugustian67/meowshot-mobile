@@ -17,6 +17,7 @@ import { Fonts, Pastels, Spacing } from '@/constants/theme';
 import { CatCarousel } from '@/features/cats/cat-carousel';
 import { useFriendAction } from '@/features/friends/queries';
 import { RelationAction } from '@/features/friends/relation-action';
+import { useLeaveWhenBlocked, useModeration } from '@/features/moderation/actions';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import { usersApi } from '@/lib/api/endpoints';
@@ -33,17 +34,40 @@ const COLUMNS = 3;
 
 /** Someone's profile and the posts of theirs you may see: public ones, plus friends-only once you are friends. */
 export default function UserProfileScreen() {
+  const theme = useTheme();
   const t = useT();
+  const { openMenu } = useModeration();
   const { username } = useLocalSearchParams<{ username: string }>();
   const profile = useQuery({
     queryKey: queryKeys.userProfile(username),
     queryFn: () => usersApi.profile(username),
   });
+  const other = profile.data && profile.data.relationship.status !== 'self' ? profile.data : null;
+  useLeaveWhenBlocked(profile.data?.id);
 
   return (
     <>
       {/* The name is in the header card already; the bar only carries Back. */}
-      <Stack.Screen options={{ title: '' }} />
+      <Stack.Screen
+        options={{
+          title: '',
+          headerRight: other
+            ? () => (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t.moderation.more}
+                  onPress={() => openMenu('USER', other.id, other)}
+                  hitSlop={8}>
+                  <SymbolView
+                    name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
+                    size={22}
+                    tintColor={theme.text}
+                  />
+                </Pressable>
+              )
+            : undefined,
+        }}
+      />
       {profile.data ? (
         <PostGrid profile={profile.data} refetchProfile={profile.refetch} />
       ) : (

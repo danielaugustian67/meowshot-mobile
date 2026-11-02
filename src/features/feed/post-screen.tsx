@@ -18,6 +18,7 @@ import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
 import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
+import { useLeaveWhenBlocked } from '@/features/moderation/actions';
 import { useHideTabBar } from '@/hooks/use-hide-tab-bar';
 import { useTheme } from '@/hooks/use-theme';
 import { postsApi } from '@/lib/api/endpoints';
@@ -56,6 +57,7 @@ export default function PostScreen() {
   const [top, setTop] = useState(0);
   // The comment box takes the bottom edge, like a chat.
   useHideTabBar();
+  useLeaveWhenBlocked(post.data?.author.id);
 
   return (
     <View ref={root} style={styles.flex} onLayout={() => root.current?.measureInWindow((_x, y) => setTop(y))}>
