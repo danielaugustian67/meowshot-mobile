@@ -87,7 +87,19 @@ export default function ReviewScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.me });
       router.replace({
         pathname: '/capture/done',
-        params: { catId: res.cat.id, name: res.cat.name ?? '', isNew: chosen === 'new' ? '1' : '0' },
+        params: {
+          catId: res.cat.id,
+          name: res.cat.name ?? '',
+          isNew: chosen === 'new' ? '1' : '0',
+          // What the share step needs, since the draft is cleared on the done screen.
+          photoId: res.photo.id,
+          sightingId: res.sighting.id,
+          photoUri: draft.photo.uri,
+          ratio: draft.photo.width / draft.photo.height || 1,
+          lat: res.sighting.lat ?? '',
+          lng: res.sighting.lng ?? '',
+          label: res.sighting.label ?? '',
+        },
       });
     } catch (e) {
       setError(errorMessage(e));

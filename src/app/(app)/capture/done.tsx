@@ -13,7 +13,18 @@ import { catName } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 
 export default function CaptureDoneScreen() {
-  const { name, isNew } = useLocalSearchParams<{ catId: string; name?: string; isNew: string }>();
+  const { name, isNew, ...shared } = useLocalSearchParams<{
+    catId: string;
+    name?: string;
+    isNew: string;
+    photoId: string;
+    sightingId: string;
+    photoUri: string;
+    ratio: string;
+    lat?: string;
+    lng?: string;
+    label?: string;
+  }>();
   const t = useT();
 
   // The draft is cleared here rather than in review, which would redirect while it is still on screen.
@@ -28,10 +39,11 @@ export default function CaptureDoneScreen() {
           {isNew === '1' ? t.capture.newCatSaved : t.capture.savedTo(catName(name))}
         </ThemedText>
       </View>
-      <Button title={t.capture.again} onPress={() => router.dismissTo('/capture')} />
+      <Button title={t.capture.share} onPress={() => router.push({ pathname: '/capture/share', params: shared })} />
+      <Button title={t.capture.again} variant="secondary" onPress={() => router.dismissTo('/capture')} />
       <Button
         title={t.capture.viewCats}
-        variant="secondary"
+        variant="ghost"
         onPress={() => {
           router.dismissTo('/capture');
           router.navigate('/cats');

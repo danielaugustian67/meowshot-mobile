@@ -10,6 +10,7 @@ export default function CaptureLayout() {
       <Stack.Screen name="gallery" options={{ title: t.capture.galleryTitle }} />
       <Stack.Screen name="review" options={{ title: t.capture.reviewTitle }} />
       <Stack.Screen name="pick-location" options={{ title: t.capture.pickLocationTitle, presentation: 'modal' }} />
+      <Stack.Screen name="share" options={{ title: t.share.title }} />
       <Stack.Screen name="done" options={{ title: t.capture.doneTitle, headerBackVisible: false, headerLeft: () => null, gestureEnabled: false }} />
     </Stack>
   );
