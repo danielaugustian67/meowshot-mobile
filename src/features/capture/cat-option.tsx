@@ -45,6 +45,9 @@ export function CatOption(props: Props) {
         {props.kind === 'new' ? (
           <>
             <ThemedText type="smallBold">{t.capture.newCat}</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              {t.capture.newCatHint}
+            </ThemedText>
           </>
         ) : (
           <>

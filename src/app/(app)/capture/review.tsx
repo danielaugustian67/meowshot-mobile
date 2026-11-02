@@ -38,6 +38,8 @@ export default function ReviewScreen() {
   const draft = useCaptureDraft();
   const [label, setLabel] = useState('');
   const [name, setName] = useState('');
+  // A different nickname idea each visit, as a hint that any silly name will do.
+  const [nameIdea] = useState(() => t.capture.nameIdeas[Math.floor(Math.random() * t.capture.nameIdeas.length)]);
   const [target, setTarget] = useState<number | 'new'>('new');
   const [locating, setLocating] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -184,7 +186,7 @@ export default function ReviewScreen() {
           {chosen === 'new' ? (
             <TextField
               label={t.capture.name}
-              placeholder="Oyen"
+              placeholder={nameIdea}
               value={name}
               onChangeText={setName}
               maxLength={60}
@@ -193,7 +195,7 @@ export default function ReviewScreen() {
         </View>
 
         <FormError message={error} />
-        <Button title={t.common.save} onPress={save} loading={saving} />
+        <Button title={t.capture.saveCat} onPress={save} loading={saving} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
