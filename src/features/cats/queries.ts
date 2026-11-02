@@ -52,13 +52,19 @@ export function useCatSightings(id: number) {
   });
 }
 
+/** Every cat of yours with a located sighting, one marker each at the latest spot, newest first. */
+export function useCatMap() {
+  return useQuery({ queryKey: queryKeys.catMap, queryFn: catsApi.map });
+}
+
 /**
- * Stores a cat the server just returned and refetches every list that shows it: Kucingku, your collection on
- * your profile and, when its name changed, the posts that carry it.
+ * Stores a cat the server just returned and refetches every list that shows it: Kucingku, the map, your
+ * collection on your profile and, when its name changed, the posts that carry it.
  */
 export function catChanged(cat: Cat, { renamed = false } = {}) {
   queryClient.setQueryData(queryKeys.cat(cat.id), cat);
   queryClient.invalidateQueries({ queryKey: queryKeys.catList });
+  queryClient.invalidateQueries({ queryKey: queryKeys.catMap });
   queryClient.invalidateQueries({ queryKey: queryKeys.users });
   if (renamed) queryClient.invalidateQueries({ queryKey: queryKeys.postsAll });
 }

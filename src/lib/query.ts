@@ -36,6 +36,7 @@ export const queryKeys = {
   cat: (id: number) => ['cats', 'detail', id] as const,
   catPhotos: (id: number) => ['cats', 'photos', id] as const,
   catSightings: (id: number) => ['cats', 'sightings', id] as const,
+  catMap: ['cats', 'map'] as const,
   /** Prefix for every post list; invalidate it when friendships change, since the friends feed does. */
   postsAll: ['posts'] as const,
   posts: (scope: FeedScope) => ['posts', scope] as const,

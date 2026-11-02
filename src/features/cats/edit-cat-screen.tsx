@@ -77,6 +77,7 @@ function EditCatForm({ cat }: { cat: Cat }) {
     router.back();
     // Its posts go with it, and the profile counts the cats.
     queryClient.invalidateQueries({ queryKey: queryKeys.catList });
+    queryClient.invalidateQueries({ queryKey: queryKeys.catMap });
     queryClient.invalidateQueries({ queryKey: queryKeys.postsAll });
     queryClient.invalidateQueries({ queryKey: queryKeys.users });
     queryClient.invalidateQueries({ queryKey: queryKeys.me });
