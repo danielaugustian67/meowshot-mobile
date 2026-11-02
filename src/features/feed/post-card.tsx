@@ -32,7 +32,7 @@ export function PostCard({
 }) {
   const theme = useTheme();
   const t = useT();
-  const { openProfile, openPost } = useStackLinks();
+  const { openProfile, openPost, openCat } = useStackLinks();
   const { openMenu } = useModeration();
   const photo = post.photos[0];
   const name = catName(post.cat.name);
@@ -50,7 +50,13 @@ export function PostCard({
         <View style={[StyleSheet.absoluteFill, styles.wash, { backgroundColor: `${frame}40`, borderColor: frame }]} />
 
         <View style={styles.header}>
-          <View style={styles.headerText}>
+          {/* The cat's page is the owner's alone, so only your own posts link to it. */}
+          <Pressable
+            accessibilityRole={post.is_owner ? 'link' : undefined}
+            accessibilityLabel={post.is_owner ? t.cats.open(name) : undefined}
+            disabled={!post.is_owner}
+            onPress={() => openCat(post.cat.id)}
+            style={styles.headerText}>
             <ThemedText numberOfLines={1} style={styles.name}>
               {name}
             </ThemedText>
@@ -59,7 +65,7 @@ export function PostCard({
                 📍 {place}
               </ThemedText>
             ) : null}
-          </View>
+          </Pressable>
           <View style={[styles.badge, { backgroundColor: frame }]}>
             <SymbolView
               name={

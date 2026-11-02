@@ -13,9 +13,12 @@ import { CatTile } from './cat-tile';
 export function CatCarousel({
   cats,
   inset,
+  onPressCat,
 }: {
   cats: (CollectionCat & { last_sighting?: Sighting | null })[];
   inset: number;
+  /** Your own collection only; see CatTile. */
+  onPressCat?: (id: number) => void;
 }) {
   return (
     <ScrollView
@@ -24,7 +27,12 @@ export function CatCarousel({
       style={{ marginHorizontal: -inset }}
       contentContainerStyle={[styles.row, { paddingHorizontal: inset + STICKER_OVERHANG }]}>
       {cats.map((cat) => (
-        <CatTile key={cat.id} cat={cat} style={styles.card} />
+        <CatTile
+          key={cat.id}
+          cat={cat}
+          style={styles.card}
+          onPress={onPressCat ? () => onPressCat(cat.id) : undefined}
+        />
       ))}
     </ScrollView>
   );

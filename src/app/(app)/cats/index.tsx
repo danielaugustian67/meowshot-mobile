@@ -10,6 +10,7 @@ import { LeanList } from '@/constants/list';
 import { Spacing } from '@/constants/theme';
 import { CatTile } from '@/features/cats/cat-tile';
 import { useMyCats } from '@/features/cats/queries';
+import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api/errors';
 import { useT } from '@/lib/i18n';
@@ -20,6 +21,7 @@ export default function CatsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
   const query = useMyCats();
+  const { openCat } = useStackLinks();
 
   if (query.isPending) {
     return (
@@ -54,7 +56,7 @@ export default function CatsScreen() {
       {...LeanList}
       data={cats}
       keyExtractor={(c) => String(c.id)}
-      renderItem={({ item }) => <CatTile cat={item} />}
+      renderItem={({ item }) => <CatTile cat={item} onPress={() => openCat(item.id)} />}
       numColumns={2}
       ItemSeparatorComponent={RowGap}
       onContentSizeChange={(_, h) => setContentHeight(h)}

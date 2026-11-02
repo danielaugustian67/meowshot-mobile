@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Fonts, Pastels, Spacing } from '@/constants/theme';
@@ -16,13 +16,16 @@ const TILTS = ['-1.5deg', '1deg', '0deg', '1.5deg', '-1deg'];
 /**
  * One cat in a collection, framed like a polaroid: cover, name and, for your own cats, when and where it
  * was last seen. `style` replaces the half-row grid sizing, e.g. with a fixed width in a carousel.
+ * Only your own cats take `onPress`: the server shows a cat's page to its owner alone.
  */
 export function CatTile({
   cat,
   style,
+  onPress,
 }: {
   cat: CollectionCat & { last_sighting?: Sighting | null };
   style?: StyleProp<ViewStyle>;
+  onPress?: () => void;
 }) {
   const theme = useTheme();
   const t = useT();
@@ -31,7 +34,12 @@ export function CatTile({
   const tilt = TILTS[cat.id % TILTS.length];
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   return (
-    <View style={[styles.tile, style]}>
+    <Pressable
+      accessibilityRole={onPress ? 'link' : undefined}
+      accessibilityLabel={onPress ? t.cats.open(catName(cat.name)) : undefined}
+      disabled={!onPress}
+      onPress={onPress}
+      style={({ pressed }) => [styles.tile, style, pressed && styles.pressed]}>
       {/* The page colour under the 25% wash, so the paw pattern does not show through the card. */}
       <View
         onLayout={(e) => setSize(e.nativeEvent.layout)}
@@ -84,12 +92,12 @@ export function CatTile({
           <SymbolView name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} size={14} tintColor="#ffffff" />
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 /** Little paw beads strung along the frame line, evenly spaced on each straight edge. */
-function BorderPaws({ width, height, color }: { width: number; height: number; color: string }) {
+export function BorderPaws({ width, height, color }: { width: number; height: number; color: string }) {
   // Centre of the 3pt border line, measured from the card edge.
   const line = BORDER / 2;
   const beads: { x: number; y: number }[] = [];
@@ -134,6 +142,7 @@ const PAW_SPACING = 36;
 const styles = StyleSheet.create({
   // Exactly half the row, so a lone tile in the last row keeps the same size as the others.
   tile: { flex: 1, maxWidth: '50%', paddingHorizontal: Spacing.three / 2 },
+  pressed: { opacity: 0.8 },
   card: { borderRadius: RADIUS, borderCurve: 'continuous', padding: INSET },
   wash: { borderRadius: RADIUS, borderCurve: 'continuous', borderWidth: BORDER },
   cover: {

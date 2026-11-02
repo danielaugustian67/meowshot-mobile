@@ -13,6 +13,7 @@ import { Spacing } from '@/constants/theme';
 import { CatCarousel } from '@/features/cats/cat-carousel';
 import { useMyCats } from '@/features/cats/queries';
 import { useFriendRequests, useFriends } from '@/features/friends/queries';
+import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api/errors';
 import { useMe } from '@/lib/auth/session';
@@ -80,6 +81,7 @@ export default function ProfileScreen() {
 /** Your Kucingku polaroids in a sideways row, with a link to the full collection. */
 function MyCollection({ count }: { count: number }) {
   const t = useT();
+  const { openCat } = useStackLinks();
   const cats = useMyCats();
   const items = cats.data?.pages.flatMap((p) => p.items) ?? [];
   if (cats.isError) return null;
@@ -93,7 +95,7 @@ function MyCollection({ count }: { count: number }) {
       {cats.isPending ? (
         <ActivityIndicator style={styles.spinner} />
       ) : items.length ? (
-        <CatCarousel cats={items} inset={Spacing.four} />
+        <CatCarousel cats={items} inset={Spacing.four} onPressCat={openCat} />
       ) : (
         <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
           {t.cats.emptyBody}

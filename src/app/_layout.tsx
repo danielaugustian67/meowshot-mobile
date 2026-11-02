@@ -50,6 +50,15 @@ function RootNavigator() {
             sheetCornerRadius: 24,
           }}
         />
+        <Stack.Screen
+          name="edit-cat"
+          options={{
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.85],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 24,
+          }}
+        />
       </Stack.Protected>
       {/* Signed-out screens live at the root (not in a group) so the guard always has a screen to fall back to. */}
       <Stack.Protected guard={status === 'signedOut'}>
