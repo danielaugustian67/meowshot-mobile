@@ -8,6 +8,7 @@ import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Vie
 import { Avatar } from '@/components/avatar';
 import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
+import { PhotoGridSkeleton, ProfileSkeleton } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
@@ -70,23 +71,19 @@ export default function UserProfileScreen() {
       />
       {profile.data ? (
         <PostGrid profile={profile.data} refetchProfile={profile.refetch} />
+      ) : profile.isPending ? (
+        <ProfileSkeleton photos />
       ) : (
         <ThemedView style={styles.center}>
           <PawPattern />
-          {profile.isPending ? (
-            <ActivityIndicator />
-          ) : (
-            <>
-              {/* Blocked and suspended users answer 404, so this also covers them. */}
-              <FormError message={errorMessage(profile.error)} />
-              <Button
-                title={t.common.retry}
-                variant="secondary"
-                onPress={() => profile.refetch()}
-                loading={profile.isRefetching}
-              />
-            </>
-          )}
+          {/* Blocked and suspended users answer 404, so this also covers them. */}
+          <FormError message={errorMessage(profile.error)} />
+          <Button
+            title={t.common.retry}
+            variant="secondary"
+            onPress={() => profile.refetch()}
+            loading={profile.isRefetching}
+          />
         </ThemedView>
       )}
     </>
@@ -143,7 +140,7 @@ function PostGrid({ profile, refetchProfile }: { profile: Profile; refetchProfil
       }
       ListEmptyComponent={
         posts.isPending ? (
-          <ActivityIndicator style={styles.spinner} />
+          <PhotoGridSkeleton />
         ) : posts.isError ? (
           <View style={styles.note}>
             <FormError message={errorMessage(posts.error)} />

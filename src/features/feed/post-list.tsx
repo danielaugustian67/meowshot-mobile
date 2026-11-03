@@ -1,10 +1,11 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
 import { Placeholder } from '@/components/placeholder';
+import { PostListSkeleton } from '@/components/skeleton';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { LeanList } from '@/constants/list';
@@ -13,11 +14,18 @@ import { useTheme } from '@/hooks/use-theme';
 import { postsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useT } from '@/lib/i18n';
+import type { Post } from '@/lib/api/types';
 import { queryKeys, type FeedScope } from '@/lib/query';
 
 import { PostCard } from './post-card';
+import { preloadThumbnails } from './preload';
 
 const PAGE = 20;
+
+// Outside the component, so a new render of the list doesn't count as a new way to draw each post.
+function renderPost({ item }: { item: Post }) {
+  return <PostCard post={item} />;
+}
 
 /** "friends" is /feed (own and friends' posts); "public" is /explore (everyone's public posts). */
 export function PostList({ scope }: { scope: FeedScope }) {
@@ -31,15 +39,13 @@ export function PostList({ scope }: { scope: FeedScope }) {
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.next_cursor,
   });
+  const newestPage = query.data?.pages.at(-1);
 
-  if (query.isPending) {
-    return (
-      <ThemedView style={styles.center}>
-        <PawPattern />
-        <ActivityIndicator />
-      </ThemedView>
-    );
-  }
+  useEffect(() => {
+    if (newestPage) preloadThumbnails(newestPage.items);
+  }, [newestPage]);
+
+  if (query.isPending) return <PostListSkeleton />;
 
   if (query.isError && !query.data) {
     return (
@@ -65,7 +71,7 @@ export function PostList({ scope }: { scope: FeedScope }) {
       {...LeanList}
       data={posts}
       keyExtractor={(p) => String(p.id)}
-      renderItem={({ item }) => <PostCard post={item} />}
+      renderItem={renderPost}
       ItemSeparatorComponent={Separator}
       contentInsetAdjustmentBehavior="automatic"
       style={{ backgroundColor: theme.background }}

@@ -5,6 +5,7 @@ import { ActionSheetIOS, Alert, Platform } from 'react-native';
 
 import { adminApi, blocksApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
+import { hapticSuccess } from '@/lib/haptics';
 import type { Comment, Page, Post, ReportTarget } from '@/lib/api/types';
 import { useT } from '@/lib/i18n';
 import { queryClient, queryKeys } from '@/lib/query';
@@ -146,7 +147,7 @@ export function useModeration() {
     );
   }
 
-  function confirmAdminDelete(postId: number, author: Person, onDeleted?: () => void) {
+  function confirmAdminDelete(postId: number, author: Person, fadeOut: () => Promise<void>, onDeleted?: () => void) {
     Alert.alert(t.moderation.adminDeleteTitle, t.moderation.adminDeleteBody(author.username), [
       { text: t.common.cancel, style: 'cancel' },
       {
@@ -155,6 +156,8 @@ export function useModeration() {
         onPress: async () => {
           try {
             await adminApi.deletePost(postId);
+            hapticSuccess();
+            await fadeOut();
             dropPost(postId);
             onDeleted?.();
           } catch (e) {

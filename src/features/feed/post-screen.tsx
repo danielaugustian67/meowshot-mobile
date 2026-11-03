@@ -80,6 +80,7 @@ export default function PostScreen() {
                 onComment={() => input.current?.focus()}
                 onDeleted={() => {
                   if (router.canGoBack()) router.back();
+                  else router.replace('/');
                 }}
               />
               <CommentList post={post.data} />

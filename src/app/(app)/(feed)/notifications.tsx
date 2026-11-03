@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Tex
 import { Avatar } from '@/components/avatar';
 import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
+import { RowsSkeleton } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
@@ -85,7 +86,7 @@ export default function NotificationsScreen() {
       ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator style={styles.spinner} /> : undefined}
       ListEmptyComponent={
         query.isPending ? (
-          <ActivityIndicator style={styles.spinner} />
+          <RowsSkeleton />
         ) : query.isError ? (
           <View style={styles.error}>
             <FormError message={errorMessage(query.error)} />

@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { memo, useState } from 'react';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
@@ -8,6 +9,7 @@ import { Fonts, PaperInk, Pastels, Spacing } from '@/constants/theme';
 import { useModeration } from '@/features/moderation/actions';
 import { displayRatio, motifOf, paperColor } from '@/features/photo-edit/decoration';
 import { PhotoPrint } from '@/features/photo-edit/photo-print';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import type { Post } from '@/lib/api/types';
@@ -18,12 +20,13 @@ import { useT } from '@/lib/i18n';
 import { ReactionBar } from './reaction-bar';
 
 const AVATAR = 36;
+const FADE_MS = 200;
 
 /**
  * One post in the feed, laid out like Instagram: who posted and where, the photo, reactions, then the caption.
  * The photo sits on its print: the cat's patterned paper unless the owner chose another, with the cat's name on a tag. Tapping the author opens their profile.
  */
-export function PostCard({
+export const PostCard = memo(function PostCard({
   post,
   linkAuthor = true,
   onComment,
@@ -41,6 +44,8 @@ export function PostCard({
   const { openProfile, openPost, openCat } = useStackLinks();
   const { openMenu, confirmAdminDelete } = useModeration();
   const isAdmin = useMe().data?.role === 'admin';
+  const [opacity] = useState(() => new Animated.Value(1));
+  const reducedMotion = useReducedMotion();
   const photo = post.photos[0];
   const name = catName(post.cat.name);
   const place = post.location?.label;
@@ -48,8 +53,15 @@ export function PostCard({
   const decoration = photo?.decoration;
   const ratio = displayRatio(photo?.width, photo?.height);
 
+  function fadeOut() {
+    const duration = reducedMotion ? 0 : FADE_MS;
+    Animated.timing(opacity, { toValue: 0, duration, useNativeDriver: true }).start();
+    // On a timer rather than the animation's callback, which waits for frames a backgrounded app never draws.
+    return new Promise<void>((done) => setTimeout(done, duration));
+  }
+
   return (
-    <View style={styles.post}>
+    <Animated.View style={[styles.post, { opacity }]}>
       <View style={styles.header}>
         <Pressable
           accessibilityRole={linkAuthor ? 'link' : undefined}
@@ -85,7 +97,7 @@ export function PostCard({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t.moderation.adminDeleteTitle}
-            onPress={() => confirmAdminDelete(post.id, post.author, onDeleted)}
+            onPress={() => confirmAdminDelete(post.id, post.author, fadeOut, onDeleted)}
             hitSlop={8}
             style={({ pressed }) => [styles.more, { opacity: pressed ? 0.5 : 1 }]}>
             <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={18} tintColor={theme.textSecondary} />
@@ -153,9 +165,9 @@ export function PostCard({
           {daysAgo(post.created_at)}
         </ThemedText>
       </View>
-    </View>
+    </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   post: { gap: Spacing.two },

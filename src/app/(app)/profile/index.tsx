@@ -3,8 +3,8 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { PawPattern } from '@/components/paw-pattern';
+import { ProfileSkeleton } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { ListCard, ListRow } from '@/components/ui/list';
 import { SectionTitle } from '@/components/ui/section-title';
@@ -26,14 +26,7 @@ export default function ProfileScreen() {
   const friends = useFriends();
   const incoming = useFriendRequests('incoming');
 
-  if (isPending) {
-    return (
-      <ThemedView style={styles.center}>
-        <PawPattern />
-        <ActivityIndicator />
-      </ThemedView>
-    );
-  }
+  if (isPending) return <ProfileSkeleton />;
 
   return (
     <ScrollView
@@ -106,7 +99,6 @@ function MyCollection({ count }: { count: number }) {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { padding: Spacing.four, gap: Spacing.four },
   header: { alignItems: 'center', gap: Spacing.two },
   editButton: { marginTop: Spacing.one },

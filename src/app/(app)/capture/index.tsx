@@ -17,6 +17,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { DraftLocation } from '@/features/capture/draft';
 import { currentLocation, fixWithin } from '@/features/capture/media';
 import { pickFromSystemLibrary, startDraft } from '@/features/capture/prepare';
+import { hapticShutter } from '@/lib/haptics';
 import { useT } from '@/lib/i18n';
 
 const CAMERA: SymbolViewProps['name'] = { ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' };
@@ -72,6 +73,7 @@ export default function CameraScreen() {
 
   async function shoot() {
     if (!camera.current || !ready || busy) return;
+    hapticShutter();
     setError(null);
     setBusy(true);
     try {

@@ -1,13 +1,15 @@
 import { SymbolView } from 'expo-symbols';
-import { useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Alert, Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useTheme } from '@/hooks/use-theme';
 import { postsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { REACTIONS, type Post, type Reaction } from '@/lib/api/types';
+import { hapticTap } from '@/lib/haptics';
 import { useT } from '@/lib/i18n';
 
 import { updateCachedPost, withReaction } from './post-cache';
@@ -20,6 +22,8 @@ export function ReactionBar({ post, frame, onComment }: { post: Post; frame: str
   const theme = useTheme();
   const t = useT();
   const [picking, setPicking] = useState(false);
+  // The reaction just chosen here, which bounces. Ones already on the post when it scrolls into view stay still.
+  const [popped, setPopped] = useState<Reaction | null>(null);
   // Taps while a change is on its way are dropped, so responses cannot land out of order.
   const pending = useRef(false);
   const used = REACTIONS.filter((r) => post.reaction_counts[r]);
@@ -30,6 +34,8 @@ export function ReactionBar({ post, frame, onComment }: { post: Post; frame: str
     pending.current = true;
     const before = post.my_reaction;
     const next = before === emoji ? null : emoji;
+    hapticTap();
+    setPopped(next);
     // Shown at once; the server's answer replaces it, or a failure puts the old reaction back.
     updateCachedPost(post.id, (p) => withReaction(p, next));
     try {
@@ -53,24 +59,25 @@ export function ReactionBar({ post, frame, onComment }: { post: Post; frame: str
         {used.map((r) => {
           const mine = post.my_reaction === r;
           return (
-            <Pressable
-              key={r}
-              accessibilityRole="button"
-              accessibilityState={{ selected: mine }}
-              accessibilityLabel={`${r} ${post.reaction_counts[r]}`}
-              onPress={() => choose(r)}
-              style={({ pressed }) => [
-                styles.chip,
-                {
-                  backgroundColor: mine ? `${theme.tint}22` : theme.background,
-                  borderColor: mine ? theme.tint : frame,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}>
-              <ThemedText type="small">
-                {r} {post.reaction_counts[r]}
-              </ThemedText>
-            </Pressable>
+            <Pop key={r} active={popped === r}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ selected: mine }}
+                accessibilityLabel={`${r} ${post.reaction_counts[r]}`}
+                onPress={() => choose(r)}
+                style={({ pressed }) => [
+                  styles.chip,
+                  {
+                    backgroundColor: mine ? `${theme.tint}22` : theme.background,
+                    borderColor: mine ? theme.tint : frame,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}>
+                <ThemedText type="small">
+                  {r} {post.reaction_counts[r]}
+                </ThemedText>
+              </Pressable>
+            </Pop>
           );
         })}
         <Pressable
@@ -128,6 +135,20 @@ export function ReactionBar({ post, frame, onComment }: { post: Post; frame: str
       ) : null}
     </View>
   );
+}
+
+/** Bounces its child each time `active` turns on. */
+function Pop({ active, children }: { active: boolean; children: ReactNode }) {
+  const [scale] = useState(() => new Animated.Value(1));
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    if (!active || reduced) return;
+    scale.setValue(1.3);
+    Animated.spring(scale, { toValue: 1, friction: 5, tension: 160, useNativeDriver: true }).start();
+  }, [active, reduced, scale]);
+
+  return <Animated.View style={{ transform: [{ scale }] }}>{children}</Animated.View>;
 }
 
 const styles = StyleSheet.create({

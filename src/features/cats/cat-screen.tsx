@@ -17,6 +17,7 @@ import {
 
 import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
+import { CatSkeleton, PhotoGridSkeleton } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
@@ -54,17 +55,12 @@ export default function CatScreen() {
   const tile = (useWindowDimensions().width - 2 * Spacing.four - (COLUMNS - 1) * GAP) / COLUMNS;
 
   if (!cat.data) {
+    if (!cat.isError) return <CatSkeleton />;
     return (
       <ThemedView style={[styles.center, styles.error]}>
         <PawPattern />
-        {cat.isError ? (
-          <>
-            <FormError message={errorMessage(cat.error)} />
-            <Button title={t.common.retry} variant="secondary" onPress={() => cat.refetch()} loading={cat.isRefetching} />
-          </>
-        ) : (
-          <ActivityIndicator />
-        )}
+        <FormError message={errorMessage(cat.error)} />
+        <Button title={t.common.retry} variant="secondary" onPress={() => cat.refetch()} loading={cat.isRefetching} />
       </ThemedView>
     );
   }
@@ -125,7 +121,7 @@ export default function CatScreen() {
         ListFooterComponent={photos.isFetchingNextPage ? <ActivityIndicator style={styles.spinner} /> : undefined}
         ListEmptyComponent={
           photos.isPending ? (
-            <ActivityIndicator style={styles.spinner} />
+            <PhotoGridSkeleton />
           ) : photos.isError ? (
             <View style={styles.error}>
               <FormError message={errorMessage(photos.error)} />

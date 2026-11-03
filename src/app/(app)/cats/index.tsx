@@ -5,6 +5,7 @@ import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'r
 import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
 import { Placeholder } from '@/components/placeholder';
+import { CatGridSkeleton } from '@/components/skeleton';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { LeanList } from '@/constants/list';
@@ -24,14 +25,7 @@ export default function CatsScreen() {
   const query = useMyCats();
   const { openCat, tab } = useStackLinks();
 
-  if (query.isPending) {
-    return (
-      <ThemedView style={styles.center}>
-        <PawPattern />
-        <ActivityIndicator />
-      </ThemedView>
-    );
-  }
+  if (query.isPending) return <CatGridSkeleton />;
 
   if (query.isError && !query.data) {
     return (
