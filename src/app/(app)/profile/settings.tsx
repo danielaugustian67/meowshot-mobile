@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { Alert, Platform, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
 import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
@@ -8,6 +8,7 @@ import { ListCard, ListRow, ListSection } from '@/components/ui/list';
 import { Segmented } from '@/components/ui/segmented';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { useMe, useSession } from '@/lib/auth/session';
 import { useT } from '@/lib/i18n';
 import { setPrefs, usePrefs, type LanguagePref, type ThemePref } from '@/lib/prefs';
@@ -20,10 +21,6 @@ export default function SettingsScreen() {
   const { data: me } = useMe();
 
   function confirmSignOut() {
-    if (Platform.OS === 'web') {
-      signOut();
-      return;
-    }
     Alert.alert(t.profile.signOutConfirm, undefined, [
       { text: t.common.cancel, style: 'cancel' },
       { text: t.profile.signOut, style: 'destructive', onPress: signOut },

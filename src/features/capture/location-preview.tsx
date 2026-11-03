@@ -1,7 +1,7 @@
-import { Camera, Map, Marker } from '@maplibre/maplibre-react-native';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useMapStyle } from '@/lib/map-style';
+import { Camera, Map, Marker } from '@/lib/maplibre';
 
 export type LocationPreviewProps = { lat: number; lng: number };
 

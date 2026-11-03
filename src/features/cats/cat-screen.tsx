@@ -2,16 +2,7 @@ import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
@@ -25,6 +16,7 @@ import { LeanList } from '@/constants/list';
 import { Fonts, PaperInk, Pastels, Spacing } from '@/constants/theme';
 import { editPhotoHref, sharePhotoHref, useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { catsApi, photosApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import type { Cat, Photo, Sighting } from '@/lib/api/types';

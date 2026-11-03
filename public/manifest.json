@@ -1,0 +1,13 @@
+{
+  "name": "Meowshot",
+  "short_name": "Meowshot",
+  "description": "Foto kucing yang kamu temui, untuk disimpan dan dibagikan.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#FFFBF7",
+  "background_color": "#FFFBF7",
+  "icons": [
+    { "src": "/logo192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/logo512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

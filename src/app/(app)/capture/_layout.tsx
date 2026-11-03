@@ -1,11 +1,12 @@
 import { Stack } from 'expo-router';
 
 import { useT } from '@/lib/i18n';
+import { webHeaderOptions } from '@/lib/web-header';
 
 export default function CaptureLayout() {
   const t = useT();
   return (
-    <Stack screenOptions={{ headerShadowVisible: false, headerBackButtonDisplayMode: 'minimal' }}>
+    <Stack screenOptions={{ ...webHeaderOptions, headerShadowVisible: false, headerBackButtonDisplayMode: 'minimal' }}>
       <Stack.Screen name="index" options={{ title: t.capture.cameraTitle, headerShown: false }} />
       <Stack.Screen name="gallery" options={{ title: t.capture.galleryTitle }} />
       <Stack.Screen name="review" options={{ title: t.capture.reviewTitle }} />

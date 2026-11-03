@@ -1,16 +1,7 @@
 import { useInfiniteQuery, type InfiniteData } from '@tanstack/react-query';
 import { SymbolView } from 'expo-symbols';
 import { useState, type Ref } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-  type TextInputInstance,
-} from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, TextInput, View, type TextInputInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
@@ -21,6 +12,7 @@ import { Spacing } from '@/constants/theme';
 import { useModeration } from '@/features/moderation/actions';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { postsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useMe } from '@/lib/auth/session';

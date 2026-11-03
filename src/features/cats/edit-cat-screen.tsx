@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
 import { ThemedText } from '@/components/themed-text';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { catsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import type { Cat } from '@/lib/api/types';
@@ -84,10 +85,6 @@ function EditCatForm({ cat }: { cat: Cat }) {
   }
 
   function confirmRemove() {
-    if (Platform.OS === 'web') {
-      remove();
-      return;
-    }
     Alert.alert(t.cats.deleteConfirm(catName(cat.name)), t.cats.deleteBody, [
       { text: t.common.cancel, style: 'cancel' },
       { text: t.cats.deleteForever, style: 'destructive', onPress: remove },

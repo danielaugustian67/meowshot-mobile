@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { FormError, FormScreen } from '@/components/form-screen';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
 import { compressPhoto } from '@/features/capture/media';
+import { Alert } from '@/lib/alert';
 import { meApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import type { Me } from '@/lib/api/types';
@@ -116,10 +117,6 @@ function AvatarPicker({ me }: { me: Me }) {
   }
 
   function confirmRemove() {
-    if (Platform.OS === 'web') {
-      save(() => meApi.deleteAvatar());
-      return;
-    }
     Alert.alert(t.settings.removePhotoConfirm, undefined, [
       { text: t.common.cancel, style: 'cancel' },
       { text: t.settings.removePhoto, style: 'destructive', onPress: () => save(() => meApi.deleteAvatar()) },

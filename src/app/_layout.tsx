@@ -11,6 +11,7 @@ import { useT } from '@/lib/i18n';
 import { loadPrefs, usePrefsReady } from '@/lib/prefs';
 import { queryClient } from '@/lib/query';
 import { persistOptions } from '@/lib/query-persist';
+import { webHeaderOptions } from '@/lib/web-header';
 
 SplashScreen.preventAutoHideAsync();
 loadPrefs();
@@ -44,7 +45,7 @@ function RootNavigator() {
 
   if (loading) return null;
   return (
-    <Stack screenOptions={{ headerShown: false, headerBackButtonDisplayMode: 'minimal', headerShadowVisible: false }}>
+    <Stack screenOptions={{ ...webHeaderOptions, headerShown: false, headerBackButtonDisplayMode: 'minimal', headerShadowVisible: false }}>
       <Stack.Protected guard={status === 'signedIn'}>
         <Stack.Screen name="(app)" />
         <Stack.Screen

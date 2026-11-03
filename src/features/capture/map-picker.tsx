@@ -1,11 +1,3 @@
-import {
-  Camera,
-  Map,
-  UserLocation,
-  type CameraRef,
-  type LngLatBounds,
-  type MapRef,
-} from '@maplibre/maplibre-react-native';
 import { useForegroundPermissions } from 'expo-location';
 import { useHeaderHeight } from 'expo-router/react-navigation';
 import { useRef, useState } from 'react';
@@ -22,6 +14,14 @@ import { useCatMap } from '@/features/cats/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/lib/i18n';
 import { useMapStyle } from '@/lib/map-style';
+import {
+  Camera,
+  Map,
+  UserLocation,
+  type CameraRef,
+  type LngLatBounds,
+  type MapRef,
+} from '@/lib/maplibre';
 
 import { currentLocation } from './media';
 import { PLACE_ZOOM, PlaceSearch } from './place-search';

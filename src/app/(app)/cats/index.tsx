@@ -1,7 +1,7 @@
 import { router, Stack } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
 import { PawPattern } from '@/components/paw-pattern';
@@ -17,6 +17,7 @@ import { MapButton } from '@/features/cats/map-button';
 import { catsMerged, useMyCats } from '@/features/cats/queries';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { catsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { confirmDestructive } from '@/lib/confirm';

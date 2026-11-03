@@ -1,0 +1,12 @@
+# Vercel does not read .gitignore, so only what the web build needs is sent.
+/*
+!/src
+!/public
+!/assets
+!/scripts
+!/app.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/react-native.config.js
+!/vercel.json

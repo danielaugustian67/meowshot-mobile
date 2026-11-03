@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FormError } from '@/components/form-screen';
 import { ThemedText } from '@/components/themed-text';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { report } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import type { ReportTarget } from '@/lib/api/types';

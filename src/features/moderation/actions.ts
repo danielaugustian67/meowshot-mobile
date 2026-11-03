@@ -1,9 +1,10 @@
 import type { InfiniteData } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useSyncExternalStore } from 'react';
-import { ActionSheetIOS, Alert, Platform } from 'react-native';
+import { ActionSheetIOS, Platform } from 'react-native';
 
 import { dropPost } from '@/features/feed/post-cache';
+import { Alert } from '@/lib/alert';
 import { adminApi, blocksApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { hapticSuccess } from '@/lib/haptics';

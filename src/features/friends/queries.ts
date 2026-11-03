@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 
+import { Alert } from '@/lib/alert';
 import { friendsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { queryClient, queryKeys } from '@/lib/query';

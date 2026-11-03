@@ -1,9 +1,7 @@
 import { GoogleSignin, isCancelledResponse, isErrorWithCode, statusCodes } from '@react-native-google-signin/google-signin';
 
-// The id_token "aud" is the Web client ID; the server only accepts IDs listed in GOOGLE_CLIENT_IDS.
-// Client IDs are public, so the production values are the defaults (like API_URL).
-const WEB_CLIENT_ID =
-  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '554006493413-iaesh43ucl55hot3nh7mhm382gsoac2h.apps.googleusercontent.com';
+import { WEB_CLIENT_ID } from './google-client-id';
+
 // Must match the iosUrlScheme (reversed) of the google-signin plugin in app.json.
 const IOS_CLIENT_ID =
   process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '554006493413-hudoaj15acn03p7c538dnj4b4evqljec.apps.googleusercontent.com';

@@ -1,11 +1,3 @@
-import {
-  Camera,
-  Map,
-  UserLocation,
-  type CameraRef,
-  type LngLatBounds,
-  type MapRef,
-} from '@maplibre/maplibre-react-native';
 import { Image } from 'expo-image';
 import { useHeaderHeight } from 'expo-router/react-navigation';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
@@ -27,6 +19,14 @@ import type { MapMarker } from '@/lib/api/types';
 import { catName, timeAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 import { useMapStyle } from '@/lib/map-style';
+import {
+  Camera,
+  Map,
+  UserLocation,
+  type CameraRef,
+  type LngLatBounds,
+  type MapRef,
+} from '@/lib/maplibre';
 
 import { CatPin, CLUSTER_RADIUS, thumbKey } from './cat-pin';
 import { boundsOf, clusterMarkers, spread, type Cluster } from './cluster';

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { FormError } from '@/components/form-screen';
@@ -11,6 +11,7 @@ import { LeanList } from '@/constants/list';
 import { Spacing } from '@/constants/theme';
 import { useModeration } from '@/features/moderation/actions';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { blocksApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import type { User } from '@/lib/api/types';

@@ -1,10 +1,10 @@
-import { Marker } from '@maplibre/maplibre-react-native';
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Pastels } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { Marker } from '@/lib/maplibre';
 
 import type { Cluster } from './cluster';
 

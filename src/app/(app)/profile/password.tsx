@@ -1,11 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 
 import { FormError, FormScreen } from '@/components/form-screen';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
+import { Alert } from '@/lib/alert';
 import { meApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useMe } from '@/lib/auth/session';

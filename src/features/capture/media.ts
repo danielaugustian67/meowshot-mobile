@@ -93,6 +93,14 @@ export async function placeName(lat: number, lng: number): Promise<string | null
 /** Where a typed place is, from the phone's own geocoder, or null when it finds nothing. */
 export async function findPlace(query: string): Promise<{ lat: number; lng: number } | null> {
   try {
+    if (Platform.OS === 'web') {
+      // Browsers have no geocoder. OpenStreetMap's allows searches a person asks for, one at a time.
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`,
+      );
+      const [hit] = (await res.json()) as { lat: string; lon: string }[];
+      return hit ? { lat: Number(hit.lat), lng: Number(hit.lon) } : null;
+    }
     const [place] = await Location.geocodeAsync(query);
     return place ? { lat: place.latitude, lng: place.longitude } : null;
   } catch {

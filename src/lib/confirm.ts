@@ -1,4 +1,4 @@
-import { Alert, Platform } from 'react-native';
+import { Alert } from '@/lib/alert';
 
 /** Asks before something that can't be undone. */
 export function confirmDestructive({
@@ -14,11 +14,6 @@ export function confirmDestructive({
   cancel: string;
   onConfirm: () => void;
 }) {
-  if (Platform.OS === 'web') {
-    // Alert does nothing on web.
-    if (window.confirm(`${title}\n\n${body}`)) onConfirm();
-    return;
-  }
   Alert.alert(title, body, [
     { text: cancel, style: 'cancel' },
     { text: action, style: 'destructive', onPress: onConfirm },

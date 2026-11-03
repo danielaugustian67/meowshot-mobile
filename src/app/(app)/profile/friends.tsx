@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { PawPattern } from '@/components/paw-pattern';
 import { ThemedText } from '@/components/themed-text';
@@ -12,6 +12,7 @@ import { useFriendAction, useFriendRequests, useFriends } from '@/features/frien
 import { RelationAction } from '@/features/friends/relation-action';
 import { UserRow } from '@/features/friends/user-row';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { friendsApi, usersApi } from '@/lib/api/endpoints';
 import { useT } from '@/lib/i18n';
 import { queryKeys } from '@/lib/query';

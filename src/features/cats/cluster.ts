@@ -1,6 +1,5 @@
-import type { LngLatBounds } from '@maplibre/maplibre-react-native';
-
 import type { MapMarker } from '@/lib/api/types';
+import type { LngLatBounds } from '@/lib/maplibre';
 
 export type Cluster = { key: string; lat: number; lng: number; markers: MapMarker[] };
 

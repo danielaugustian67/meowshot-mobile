@@ -1,11 +1,12 @@
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Alert, Animated, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { postsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { REACTIONS, type Post, type Reaction } from '@/lib/api/types';

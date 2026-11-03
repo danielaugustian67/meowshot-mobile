@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Alert, Platform } from 'react-native';
 
 import { FormError, FormScreen } from '@/components/form-screen';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/hooks/use-theme';
+import { Alert } from '@/lib/alert';
 import { meApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useMe, useSession } from '@/lib/auth/session';
@@ -36,10 +36,6 @@ export default function DeleteAccountScreen() {
   }
 
   function confirm() {
-    if (Platform.OS === 'web') {
-      remove();
-      return;
-    }
     Alert.alert(t.settings.deleteConfirm, t.settings.deleteBody, [
       { text: t.common.cancel, style: 'cancel' },
       { text: t.settings.deleteForever, style: 'destructive', onPress: remove },

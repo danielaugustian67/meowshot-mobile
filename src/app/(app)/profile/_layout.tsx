@@ -4,12 +4,13 @@ import { Pressable } from 'react-native';
 
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/lib/i18n';
+import { webHeaderOptions } from '@/lib/web-header';
 
 export default function ProfileLayout() {
   const theme = useTheme();
   const t = useT();
   return (
-    <Stack screenOptions={{ headerShadowVisible: false, headerBackButtonDisplayMode: 'minimal' }}>
+    <Stack screenOptions={{ ...webHeaderOptions, headerShadowVisible: false, headerBackButtonDisplayMode: 'minimal' }}>
       <Stack.Screen
         name="index"
         options={{
