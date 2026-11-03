@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useSyncExternalStore } from 'react';
 import { ActionSheetIOS, Alert, Platform } from 'react-native';
 
+import { dropPost } from '@/features/feed/post-cache';
 import { adminApi, blocksApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { hapticSuccess } from '@/lib/haptics';
@@ -62,21 +63,6 @@ function refetchAfterBlock() {
     // The server deletes notifications between the two of you.
     queryClient.invalidateQueries({ queryKey: queryKeys.notificationsAll }),
   ]);
-}
-
-/**
- * Takes a post an admin removed out of every list. Its own screen is left alone: refetching it would only flash a
- * "not found" while `onDeleted` closes it.
- */
-function dropPost(postId: number) {
-  queryClient.setQueriesData<InfiniteData<Page<Post>>>({ queryKey: queryKeys.postsAll }, (data) => {
-    if (!data?.pages) return data;
-    return { ...data, pages: data.pages.map((p) => ({ ...p, items: p.items.filter((x) => x.id !== postId) })) };
-  });
-  queryClient.invalidateQueries({ queryKey: queryKeys.postsAll, predicate: (q) => q.queryKey[1] !== 'detail' });
-  queryClient.invalidateQueries({ queryKey: queryKeys.users });
-  queryClient.invalidateQueries({ queryKey: queryKeys.cats });
-  queryClient.invalidateQueries({ queryKey: queryKeys.me });
 }
 
 /** Report and block, from a post, a comment or a profile. Blocking always asks first. */
@@ -147,7 +133,7 @@ export function useModeration() {
     );
   }
 
-  function confirmAdminDelete(postId: number, author: Person, fadeOut: () => Promise<void>, onDeleted?: () => void) {
+  function confirmAdminDelete(postId: number, author: Person, fadeOut: () => Promise<void>) {
     Alert.alert(t.moderation.adminDeleteTitle, t.moderation.adminDeleteBody(author.username), [
       { text: t.common.cancel, style: 'cancel' },
       {
@@ -159,7 +145,6 @@ export function useModeration() {
             hapticSuccess();
             await fadeOut();
             dropPost(postId);
-            onDeleted?.();
           } catch (e) {
             Alert.alert(errorMessage(e));
           }

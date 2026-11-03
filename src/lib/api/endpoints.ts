@@ -21,6 +21,7 @@ import type {
   Page,
   PendingSignup,
   Photo,
+  PhotoDecoration,
   Post,
   Profile,
   Reaction,
@@ -124,7 +125,9 @@ export const catsApi = {
 };
 
 export const photosApi = {
-  update: (id: number, caption: string) => request<Photo>(`/photos/${id}`, { method: 'PATCH', body: { caption } }),
+  /** Only what is sent changes. A null decoration removes the frame and stickers. */
+  update: (id: number, body: { caption?: string; decoration?: PhotoDecoration | null }) =>
+    request<Photo>(`/photos/${id}`, { method: 'PATCH', body }),
   delete: (id: number) => request<void>(`/photos/${id}`, { method: 'DELETE' }),
 };
 

@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
-import { Redirect, router, usePreventRemove } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FormError } from '@/components/form-screen';
@@ -12,12 +12,10 @@ import { updateDraft, useCaptureDraft } from '@/features/capture/draft';
 import { cropPhoto } from '@/features/capture/media';
 import { INITIAL_CROP, type CropState } from '@/features/photo-edit/crop';
 import { CropCanvas, CropControls } from '@/features/photo-edit/crop-editor';
-import { clampSticker, displayRatio, motifOf, paperColor } from '@/features/photo-edit/decoration';
-import { FramePicker } from '@/features/photo-edit/frame-picker';
-import { PhotoPrint, printWidthFor } from '@/features/photo-edit/photo-print';
-import { StickerCanvas, StickerControls } from '@/features/photo-edit/sticker-editor';
+import { DecorationControls, DecorationPrint, useDecorationEditor } from '@/features/photo-edit/decoration-editor';
+import { useDiscardGuard } from '@/features/photo-edit/use-discard-guard';
 import { useTheme } from '@/hooks/use-theme';
-import type { PhotoDecoration, PhotoSticker } from '@/lib/api/types';
+import type { PhotoDecoration } from '@/lib/api/types';
 import { useT } from '@/lib/i18n';
 
 type Tab = 'crop' | 'frame' | 'stickers';
@@ -37,38 +35,15 @@ export default function EditScreen() {
   }));
   const [crop, setCrop] = useState(opened.crop);
   const [cropped, setCropped] = useState(() => ({ photo: draft?.photo, crop: opened.crop }));
-  const [decoration, setDecoration] = useState(opened.decoration);
-  const [selected, setSelected] = useState<number | null>(null);
+  const editor = useDecorationEditor(opened.decoration);
+  const decoration = editor.decoration;
   const [area, setArea] = useState({ width: 0, height: 0 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [leaving, setLeaving] = useState(false);
-  const changed = crop !== opened.crop || decoration !== opened.decoration;
-  const allowLeaving = usePreventRemove(changed && !leaving, ({ repeat }) => {
-    const leave = () => {
-      setLeaving(true);
-      repeat();
-    };
-    if (Platform.OS === 'web') {
-      // Alert does nothing on web, which would leave no way out of this screen.
-      if (window.confirm(t.capture.editDiscardTitle)) leave();
-      return;
-    }
-    Alert.alert(t.capture.editDiscardTitle, t.capture.editDiscardBody, [
-      { text: t.capture.editKeep, style: 'cancel' },
-      { text: t.capture.editDiscard, style: 'destructive', onPress: leave },
-    ]);
-  });
+  const leave = useDiscardGuard(crop !== opened.crop || decoration !== opened.decoration);
 
   if (!draft || !source || !cropped.photo) return <Redirect href="/capture" />;
   const photo = cropped.photo;
-  const photoRatio = photo.width / photo.height || 1;
-  const ratio = displayRatio(photo.width, photo.height);
-  const stickers = decoration.stickers ?? [];
-  // The cat isn't known yet for a new one, so "Auto" previews the first colour and pattern.
-  const color = paperColor(decoration, 0);
-
   /** The photo as the crop now stands, cut only when the crop changed since last time. */
   async function applyCrop() {
     if (cropped.crop === crop && cropped.photo) return cropped.photo;
@@ -90,7 +65,7 @@ export default function EditScreen() {
   }
 
   function changeTab(next: Tab) {
-    setSelected(null);
+    editor.setSelected(null);
     if (next === 'crop') setTab(next);
     else run(async () => {
       await applyCrop();
@@ -102,21 +77,9 @@ export default function EditScreen() {
     run(async () => {
       const next = await applyCrop();
       updateDraft({ photo: next, source, crop, decoration });
-      setLeaving(true);
-      allowLeaving();
+      leave();
       router.back();
     });
-  }
-
-  function setStickers(next: PhotoSticker[]) {
-    setDecoration((d) => ({ ...d, stickers: next.length ? next : undefined }));
-  }
-
-  function changeSticker(index: number, update: (sticker: PhotoSticker) => PhotoSticker) {
-    setDecoration((d) => ({
-      ...d,
-      stickers: d.stickers?.map((s, i) => (i === index ? clampSticker(update(s)) : s)),
-    }));
   }
 
   const tabs: { value: Tab; label: string }[] = [
@@ -133,12 +96,14 @@ export default function EditScreen() {
         {area.width === 0 ? null : tab === 'crop' ? (
           <CropCanvas photo={source} crop={crop} area={area} onChange={setCrop} />
         ) : (
-          <PhotoPrint
-            color={color}
-            motif={motifOf(decoration, 0)}
-            ratio={ratio}
-            photoRatio={photoRatio}
-            style={{ width: printWidthFor(area.width, area.height, ratio) }}
+          <DecorationPrint
+            editor={editor}
+            tab={tab}
+            // The cat isn't known yet for a new one, so "Auto" previews the first colour and pattern.
+            catId={0}
+            area={area}
+            width={photo.width}
+            height={photo.height}
             photo={
               <Image
                 source={{ uri: photo.uri }}
@@ -147,41 +112,15 @@ export default function EditScreen() {
                 accessibilityLabel={t.capture.photoAlt}
               />
             }
-            stickers={tab === 'frame' ? stickers : undefined}
-            overlay={
-              tab === 'stickers' ? (
-                <StickerCanvas
-                  stickers={stickers}
-                  photoRatio={photoRatio}
-                  selected={selected}
-                  onSelect={setSelected}
-                  onChange={changeSticker}
-                />
-              ) : undefined
-            }
           />
         )}
       </View>
 
-      {tab === 'crop' ? <CropControls photo={source} crop={crop} onChange={setCrop} /> : null}
-      {tab === 'frame' ? (
-        <FramePicker decoration={decoration} color={color} onChange={(patch) => setDecoration((d) => ({ ...d, ...patch }))} />
-      ) : null}
-      {tab === 'stickers' ? (
-        <StickerControls
-          stickers={stickers}
-          selected={selected}
-          onAdd={(sticker) => {
-            setStickers([...stickers, sticker]);
-            setSelected(stickers.length);
-          }}
-          onChange={changeSticker}
-          onRemove={(index) => {
-            setStickers(stickers.filter((_, i) => i !== index));
-            setSelected(null);
-          }}
-        />
-      ) : null}
+      {tab === 'crop' ? (
+        <CropControls photo={source} crop={crop} onChange={setCrop} />
+      ) : (
+        <DecorationControls editor={editor} tab={tab} catId={0} />
+      )}
 
       <FormError message={error} />
       <Button title={t.capture.editDone} onPress={finish} loading={busy} />

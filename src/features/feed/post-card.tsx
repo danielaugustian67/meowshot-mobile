@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { memo, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
@@ -30,12 +31,9 @@ export const PostCard = memo(function PostCard({
   post,
   linkAuthor = true,
   onComment,
-  onDeleted,
 }: {
   post: Post;
   linkAuthor?: boolean;
-  /** Called after an admin removes the post, for a screen that shows nothing else. */
-  onDeleted?: () => void;
   /** What the comment button does; by default it opens the post, where the comments are. */
   onComment?: () => void;
 }) {
@@ -87,23 +85,34 @@ export const PostCard = memo(function PostCard({
           name={
             post.visibility === 'PUBLIC'
               ? { ios: 'globe', android: 'public', web: 'public' }
-              : { ios: 'person.2.fill', android: 'group', web: 'group' }
+              : post.visibility === 'PRIVATE'
+                ? { ios: 'lock.fill', android: 'lock', web: 'lock' }
+                : { ios: 'person.2.fill', android: 'group', web: 'group' }
           }
           size={16}
           tintColor={theme.textSecondary}
-          accessibilityLabel={post.visibility === 'PUBLIC' ? t.feed.public : t.feed.friends}
+          accessibilityLabel={{ PUBLIC: t.feed.public, FRIENDS: t.feed.friends, PRIVATE: t.feed.private }[post.visibility]}
         />
         {isAdmin ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t.moderation.adminDeleteTitle}
-            onPress={() => confirmAdminDelete(post.id, post.author, fadeOut, onDeleted)}
+            onPress={() => confirmAdminDelete(post.id, post.author, fadeOut)}
             hitSlop={8}
             style={({ pressed }) => [styles.more, { opacity: pressed ? 0.5 : 1 }]}>
             <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={18} tintColor={theme.textSecondary} />
           </Pressable>
         ) : null}
-        {post.is_owner ? null : (
+        {post.is_owner ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.feed.edit}
+            onPress={() => router.push({ pathname: '/edit-post', params: { id: String(post.id) } })}
+            hitSlop={8}
+            style={({ pressed }) => [styles.more, { opacity: pressed ? 0.5 : 1 }]}>
+            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={18} tintColor={theme.textSecondary} />
+          </Pressable>
+        ) : (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t.moderation.more}

@@ -1,14 +1,16 @@
 import { useInfiniteQuery, useQuery, type InfiniteData } from '@tanstack/react-query';
 
+import { dropPost, updateCachedPost } from '@/features/feed/post-cache';
 import { catsApi } from '@/lib/api/endpoints';
-import type { Cat, Page } from '@/lib/api/types';
+import type { Cat, Page, Photo } from '@/lib/api/types';
 import { queryClient, queryKeys } from '@/lib/query';
 
 const PAGE = 30;
 
 /** Your own collection, most recently seen first. Kucingku and the Profil tab share this cache. */
-export function useMyCats() {
+export function useMyCats({ enabled = true } = {}) {
   return useInfiniteQuery({
+    enabled,
     queryKey: queryKeys.catList,
     queryFn: ({ pageParam }) => catsApi.list({ cursor: pageParam, limit: PAGE, sort: 'last_seen' }),
     initialPageParam: null as string | null,
@@ -67,4 +69,35 @@ export function catChanged(cat: Cat, { renamed = false } = {}) {
   queryClient.invalidateQueries({ queryKey: queryKeys.catMap });
   queryClient.invalidateQueries({ queryKey: queryKeys.users });
   if (renamed) queryClient.invalidateQueries({ queryKey: queryKeys.postsAll });
+}
+
+/** Stores a photo the server just returned, in the cat's gallery and in the post it was shared in. */
+export function photoChanged(photo: Photo) {
+  queryClient.setQueryData<InfiniteData<Page<Photo>>>(queryKeys.catPhotos(photo.cat_id), (data) =>
+    data && { ...data, pages: data.pages.map((p) => ({ ...p, items: p.items.map((x) => (x.id === photo.id ? photo : x)) })) },
+  );
+  if (photo.post_id) {
+    updateCachedPost(photo.post_id, (post) => ({
+      ...post,
+      photos: post.photos.map((x) => (x.id === photo.id ? { ...x, decoration: photo.decoration } : x)),
+    }));
+  }
+}
+
+/** Takes a deleted photo out at once. The server may have picked a new cover and deleted the post it was in. */
+export function photoRemoved(photo: Photo) {
+  queryClient.setQueryData<InfiniteData<Page<Photo>>>(queryKeys.catPhotos(photo.cat_id), (data) =>
+    data && { ...data, pages: data.pages.map((p) => ({ ...p, items: p.items.filter((x) => x.id !== photo.id) })) },
+  );
+  queryClient.invalidateQueries({ queryKey: queryKeys.cats });
+  queryClient.invalidateQueries({ queryKey: queryKeys.users });
+  if (photo.post_id) dropPost(photo.post_id);
+}
+
+/** After cats are combined: one is gone and the other has gained its photos, sightings and posts. */
+export function catsMerged() {
+  queryClient.invalidateQueries({ queryKey: queryKeys.cats });
+  queryClient.invalidateQueries({ queryKey: queryKeys.postsAll });
+  queryClient.invalidateQueries({ queryKey: queryKeys.users });
+  queryClient.invalidateQueries({ queryKey: queryKeys.me });
 }

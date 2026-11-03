@@ -12,6 +12,7 @@ import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { CatOption } from '@/features/capture/cat-option';
+import { useMyCats } from '@/features/cats/queries';
 import { updateDraft, useCaptureDraft, type DraftLocation } from '@/features/capture/draft';
 import { currentLocation, placeName } from '@/features/capture/media';
 import { displayRatio, hasDecoration, motifOf, paperColor, serializeDecoration } from '@/features/photo-edit/decoration';
@@ -44,6 +45,7 @@ export default function ReviewScreen() {
   // A different nickname idea each visit, as a hint that any silly name will do.
   const [nameIdea] = useState(() => t.capture.nameIdeas[Math.floor(Math.random() * t.capture.nameIdeas.length)]);
   const [target, setTarget] = useState<number | 'new'>('new');
+  const [showMine, setShowMine] = useState(false);
   const [locating, setLocating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +56,8 @@ export default function ReviewScreen() {
     queryFn: () => catsApi.nearby(loc!.lat, loc!.lng, SUGGEST_RADIUS_M),
     enabled: !!loc,
   });
+  // Only looked up once asked for: most photos are of a new cat or one seen nearby.
+  const mine = useMyCats({ enabled: showMine });
   const suggestedLabel = useQuery({
     queryKey: queryKeys.placeName(loc?.lat ?? 0, loc?.lng ?? 0),
     queryFn: () => placeName(loc!.lat, loc!.lng),
@@ -64,8 +68,10 @@ export default function ReviewScreen() {
   if (!draft) return <Redirect href="/capture" />;
 
   const suggestions = loc ? (nearby.data?.items ?? []) : [];
+  const others = (mine.data?.pages.flatMap((p) => p.items) ?? []).filter((c) => !suggestions.some((s) => s.cat.id === c.id));
   // A cat chosen earlier may drop out of the list when the location changes.
-  const chosen = target !== 'new' && suggestions.some((s) => s.cat.id === target) ? target : 'new';
+  const chosen =
+    target !== 'new' && (suggestions.some((s) => s.cat.id === target) || others.some((c) => c.id === target)) ? target : 'new';
 
   async function pickCurrentLocation() {
     setError(null);
@@ -216,6 +222,31 @@ export default function ReviewScreen() {
               onPress={() => setTarget(s.cat.id)}
             />
           ))}
+          {showMine ? (
+            <>
+              {mine.isPending ? <ActivityIndicator style={styles.spinner} /> : null}
+              {mine.isError ? <FormError message={errorMessage(mine.error)} /> : null}
+              {others.length > 0 ? (
+                <ThemedText type="small" themeColor="textSecondary">
+                  {t.capture.otherCatsHint}
+                </ThemedText>
+              ) : null}
+              {others.map((c) => (
+                <CatOption key={c.id} kind="cat" cat={c} selected={chosen === c.id} onPress={() => setTarget(c.id)} />
+              ))}
+              {mine.hasNextPage ? (
+                <Button
+                  title={t.cats.showMore}
+                  variant="ghost"
+                  size="small"
+                  onPress={() => mine.fetchNextPage()}
+                  loading={mine.isFetchingNextPage}
+                />
+              ) : null}
+            </>
+          ) : (
+            <Button title={t.capture.otherCats} variant="secondary" size="small" onPress={() => setShowMine(true)} />
+          )}
           {chosen === 'new' ? (
             <TextField
               label={t.capture.name}

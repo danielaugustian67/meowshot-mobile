@@ -35,11 +35,17 @@ export function CatTile({
   style,
   onPress,
   onShare,
+  picked,
+  main,
 }: {
   cat: CollectionCat & { last_sighting?: Sighting | null };
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   onShare?: () => void;
+  /** While choosing cats for an album: whether this one is chosen. Leave undefined otherwise. */
+  picked?: boolean;
+  /** The chosen cat the others will move into. */
+  main?: boolean;
 }) {
   const theme = useTheme();
   const t = useT();
@@ -48,69 +54,89 @@ export function CatTile({
   const tilt = TILTS[cat.id % TILTS.length];
   return (
     <Pressable
-      accessibilityRole={onPress ? 'link' : undefined}
-      accessibilityLabel={onPress ? t.cats.open(catName(cat.name)) : undefined}
+      accessibilityRole={picked !== undefined ? 'checkbox' : onPress ? 'link' : undefined}
+      accessibilityLabel={picked !== undefined ? catName(cat.name) : onPress ? t.cats.open(catName(cat.name)) : undefined}
+      accessibilityState={picked !== undefined ? { checked: picked } : undefined}
       disabled={!onPress}
       onPress={onPress}
       style={({ pressed }) => [styles.tile, style, pressed && styles.pressed]}>
-      <View style={[styles.card, { backgroundColor: frame, transform: [{ rotate: tilt }] }]}>
-        <PaperMotif id={cat.id} />
-        <View style={[styles.cover, { backgroundColor: theme.backgroundElement }]}>
-          {cat.cover?.thumb_url ? (
-            <Image
-              source={{ uri: cat.cover.thumb_url, cacheKey: `photo-thumb-${cat.cover.photo_id}` }}
-              style={StyleSheet.absoluteFill}
-              contentFit="cover"
-              transition={150}
-            />
-          ) : (
-            <SymbolView
-              name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }}
-              size={32}
-              tintColor={theme.textSecondary}
-            />
-          )}
-          {cat.photo_count > 1 ? (
-            <View style={styles.badge}>
-              <ThemedText type="small" style={styles.badgeText}>
-                {t.cats.photos(cat.photo_count)}
-              </ThemedText>
-            </View>
-          ) : null}
-          {cat.is_favorite ? (
-            <SymbolView
-              name={{ ios: 'heart.fill', android: 'favorite', web: 'favorite' }}
-              size={18}
-              tintColor={theme.tint}
-              style={styles.favorite}
-              accessibilityLabel={t.cats.favorite}
-            />
-          ) : null}
-          {onShare && cat.photo_count > 0 ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t.share.shareCat(catName(cat.name))}
-              onPress={onShare}
-              hitSlop={6}
-              style={({ pressed }) => [styles.share, pressed && styles.pressed]}>
-              <SymbolView
-                name={{ ios: 'square.and.arrow.up', android: 'share', web: 'share' }}
-                size={18}
-                tintColor="#ffffff"
+      <View>
+        {/* A second sheet behind the print, so a cat with many photos reads as an album. */}
+        {cat.photo_count > 1 ? <View style={[styles.sheet, { backgroundColor: frame }]} /> : null}
+        <View style={[styles.card, { backgroundColor: frame, transform: [{ rotate: tilt }] }]}>
+          <PaperMotif id={cat.id} />
+          {picked ? <View style={[styles.ring, { borderColor: theme.tint }]} /> : null}
+          <View style={[styles.cover, { backgroundColor: theme.backgroundElement }]}>
+            {cat.cover?.thumb_url ? (
+              <Image
+                source={{ uri: cat.cover.thumb_url, cacheKey: `photo-thumb-${cat.cover.photo_id}` }}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+                transition={150}
               />
-            </Pressable>
-          ) : null}
-        </View>
-        <View style={styles.caption}>
-          <ThemedText type="smallBold" numberOfLines={1} style={styles.name}>
-            {catName(cat.name)}
-          </ThemedText>
-          {seen ? (
-            <ThemedText type="small" numberOfLines={1} style={styles.stamp}>
-              {seen.label ? `${daysAgo(seen.seen_at)} · ${seen.label}` : daysAgo(seen.seen_at)}
+            ) : (
+              <SymbolView
+                name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }}
+                size={32}
+                tintColor={theme.textSecondary}
+              />
+            )}
+            {cat.photo_count > 1 ? (
+              <View style={styles.badge}>
+                <ThemedText type="small" style={styles.badgeText}>
+                  {t.cats.photos(cat.photo_count)}
+                </ThemedText>
+              </View>
+            ) : null}
+            {picked !== undefined ? (
+              <View style={[styles.check, picked ? { backgroundColor: theme.tint, borderColor: theme.tint } : styles.unchecked]}>
+                {picked ? (
+                  <SymbolView name={{ ios: 'checkmark', android: 'check', web: 'check' }} size={16} tintColor="#ffffff" />
+                ) : null}
+              </View>
+            ) : null}
+            {main ? (
+              <View style={[styles.main, { backgroundColor: theme.tint }]}>
+                <ThemedText type="small" style={styles.badgeText} numberOfLines={1}>
+                  {t.cats.albumMain}
+                </ThemedText>
+              </View>
+            ) : null}
+            {cat.is_favorite && !main ? (
+              <SymbolView
+                name={{ ios: 'heart.fill', android: 'favorite', web: 'favorite' }}
+                size={18}
+                tintColor={theme.tint}
+                style={styles.favorite}
+                accessibilityLabel={t.cats.favorite}
+              />
+            ) : null}
+            {onShare && cat.photo_count > 0 ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t.share.shareCat(catName(cat.name))}
+                onPress={onShare}
+                hitSlop={6}
+                style={({ pressed }) => [styles.share, pressed && styles.pressed]}>
+                <SymbolView
+                  name={{ ios: 'square.and.arrow.up', android: 'share', web: 'share' }}
+                  size={18}
+                  tintColor="#ffffff"
+                />
+              </Pressable>
+            ) : null}
+          </View>
+          <View style={styles.caption}>
+            <ThemedText type="smallBold" numberOfLines={1} style={styles.name}>
+              {catName(cat.name)}
             </ThemedText>
-          ) : null}
-          <BoothMark />
+            {seen ? (
+              <ThemedText type="small" numberOfLines={1} style={styles.stamp}>
+                {seen.label ? `${daysAgo(seen.seen_at)} · ${seen.label}` : daysAgo(seen.seen_at)}
+              </ThemedText>
+            ) : null}
+            <BoothMark />
+          </View>
         </View>
       </View>
     </Pressable>
@@ -190,4 +216,35 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
   favorite: { position: 'absolute', top: Spacing.two, right: Spacing.two },
+  sheet: {
+    position: 'absolute',
+    top: Spacing.one,
+    bottom: -Spacing.one,
+    left: Spacing.one,
+    right: -Spacing.half,
+    borderRadius: PAPER_RADIUS,
+    opacity: 0.55,
+    transform: [{ rotate: '3deg' }],
+  },
+  check: {
+    position: 'absolute',
+    top: Spacing.two,
+    left: Spacing.two,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unchecked: { borderColor: '#ffffff', backgroundColor: 'rgba(0,0,0,0.35)' },
+  ring: { ...StyleSheet.absoluteFill, borderRadius: PAPER_RADIUS, borderWidth: 3, pointerEvents: 'none' },
+  main: {
+    position: 'absolute',
+    top: Spacing.two,
+    left: Spacing.two + 26 + Spacing.one,
+    right: Spacing.one,
+    paddingHorizontal: Spacing.two,
+    borderRadius: 10,
+  },
 });

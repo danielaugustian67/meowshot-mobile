@@ -1,5 +1,5 @@
-import { useQuery, type InfiniteData } from '@tanstack/react-query';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -23,21 +23,12 @@ import { useHideTabBar } from '@/hooks/use-hide-tab-bar';
 import { useTheme } from '@/hooks/use-theme';
 import { postsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
-import type { Page, Post } from '@/lib/api/types';
 import { useT } from '@/lib/i18n';
-import { queryClient, queryKeys } from '@/lib/query';
+import { queryKeys } from '@/lib/query';
 
 import { CommentInput, CommentList } from './comments';
+import { cachedPost, useLeaveWhenPostGone } from './post-cache';
 import { PostCard } from './post-card';
-
-/** The post as some already loaded list has it, so the screen opens without a spinner. */
-function cachedPost(id: number): Post | undefined {
-  const lists = queryClient.getQueriesData<InfiniteData<Page<Post>>>({ queryKey: queryKeys.postsAll });
-  for (const [, data] of lists) {
-    const found = data?.pages?.flatMap((p) => p.items).find((p) => p.id === id);
-    if (found) return found;
-  }
-}
 
 /** One post on its own with its comments, opened from a feed card or a profile's photo grid. */
 export default function PostScreen() {
@@ -58,6 +49,7 @@ export default function PostScreen() {
   // The comment box takes the bottom edge, like a chat.
   useHideTabBar();
   useLeaveWhenBlocked(post.data?.author.id);
+  useLeaveWhenPostGone(id);
 
   return (
     <View ref={root} style={styles.flex} onLayout={() => root.current?.measureInWindow((_x, y) => setTop(y))}>
@@ -75,14 +67,7 @@ export default function PostScreen() {
           <PawPattern inScroll />
           {post.data ? (
             <>
-              <PostCard
-                post={post.data}
-                onComment={() => input.current?.focus()}
-                onDeleted={() => {
-                  if (router.canGoBack()) router.back();
-                  else router.replace('/');
-                }}
-              />
+              <PostCard post={post.data} onComment={() => input.current?.focus()} />
               <CommentList post={post.data} />
             </>
           ) : post.isPending ? (

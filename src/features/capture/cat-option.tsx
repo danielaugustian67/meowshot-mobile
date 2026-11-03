@@ -11,9 +11,9 @@ import { catName, daysAgo, distance } from '@/lib/format';
 type Props = {
   selected: boolean;
   onPress: () => void;
-} & ({ kind: 'new' } | { kind: 'cat'; cat: Cat; distanceM: number });
+} & ({ kind: 'new' } | { kind: 'cat'; cat: Cat; distanceM?: number });
 
-/** One choice in "simpan ke": a new cat, or an existing cat seen nearby. */
+/** One choice in "simpan ke": a new cat, or an existing cat, with how far away it was seen when that's known. */
 export function CatOption(props: Props) {
   const theme = useTheme();
   const t = useT();
@@ -53,8 +53,12 @@ export function CatOption(props: Props) {
           <>
             <ThemedText type="smallBold">{catName(props.cat.name)}</ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              {distance(props.distanceM)}
-              {props.cat.last_sighting ? ` · ${daysAgo(props.cat.last_sighting.seen_at)}` : ''}
+              {[
+                props.distanceM !== undefined ? distance(props.distanceM) : null,
+                props.cat.last_sighting ? daysAgo(props.cat.last_sighting.seen_at) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </ThemedText>
           </>
         )}

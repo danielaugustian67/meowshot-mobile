@@ -53,10 +53,10 @@ function round(value: number, places: number) {
   return Math.round(value * unit) / unit;
 }
 
-/** The form field for an upload, or undefined when there is nothing to save. */
-export function serializeDecoration(decoration: PhotoDecoration | null | undefined): string | undefined {
-  if (!decoration || !hasDecoration(decoration)) return undefined;
-  return JSON.stringify({
+/** What the server stores, or null when there is nothing to save. */
+export function cleanDecoration(decoration: PhotoDecoration | null | undefined): PhotoDecoration | null {
+  if (!decoration || !hasDecoration(decoration)) return null;
+  return {
     ...decoration,
     stickers: decoration.stickers?.map((s) => ({
       id: s.id,
@@ -65,7 +65,13 @@ export function serializeDecoration(decoration: PhotoDecoration | null | undefin
       scale: round(s.scale, 4),
       rotation: round(s.rotation, 1),
     })),
-  });
+  };
+}
+
+/** The form field for an upload, or undefined when there is nothing to save. */
+export function serializeDecoration(decoration: PhotoDecoration | null | undefined): string | undefined {
+  const clean = cleanDecoration(decoration);
+  return clean ? JSON.stringify(clean) : undefined;
 }
 
 /** A route param back into a decoration; anything unreadable counts as none. */

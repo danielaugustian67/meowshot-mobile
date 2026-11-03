@@ -30,6 +30,14 @@ export function sharePhotoHref(photo: Photo, tab: StackTab) {
   };
 }
 
+/** The editor for the frame and stickers of a saved photo, from the collection or from its post. */
+export function editPhotoHref(photoId: number, catId: number, postId?: number) {
+  return {
+    pathname: '/edit-photo' as const,
+    params: { photoId: String(photoId), catId: String(catId), ...(postId ? { postId: String(postId) } : {}) },
+  };
+}
+
 /**
  * Opens a profile, a post or one of your cats on top of the current tab, so Back returns to where it was tapped.
  * The Feed, Kucingku and Profil stacks each route all three screens; the Foto tab falls back to Feed.

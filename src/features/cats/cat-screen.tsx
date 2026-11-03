@@ -3,11 +3,9 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import {
-  ActionSheetIOS,
   ActivityIndicator,
   Alert,
   FlatList,
-  Platform,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -20,21 +18,23 @@ import { PawPattern } from '@/components/paw-pattern';
 import { CatSkeleton, PhotoGridSkeleton } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ActionMenu, showNativeActionMenu, type MenuAction } from '@/components/ui/action-menu';
 import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/section-title';
 import { LeanList } from '@/constants/list';
 import { Fonts, PaperInk, Pastels, Spacing } from '@/constants/theme';
-import { sharePhotoHref, useStackLinks } from '@/hooks/use-stack-links';
+import { editPhotoHref, sharePhotoHref, useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
-import { catsApi } from '@/lib/api/endpoints';
+import { catsApi, photosApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import type { Cat, Photo, Sighting } from '@/lib/api/types';
+import { confirmDestructive } from '@/lib/confirm';
 import { catName, daysAgo, timeAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 import { queryClient, queryKeys } from '@/lib/query';
 
 import { BoothMark, PaperMotif } from './cat-tile';
-import { catChanged, useCat, useCatPhotos, useCatSightings } from './queries';
+import { catChanged, photoRemoved, useCat, useCatPhotos, useCatSightings } from './queries';
 import { StickerLayer } from '@/features/photo-edit/sticker-layer';
 
 const COLUMNS = 3;
@@ -42,7 +42,7 @@ const GAP = Spacing.one;
 
 /**
  * One of your cats: a big photobooth print of the cover, what you know about them, where they were seen and every photo.
- * Photos can become the cover, be shared, or open the post they were shared in; the pencil edits the name and notes.
+ * Photos can become the cover, be shared, open the post they were shared in, get a new frame or be deleted; the pencil edits the name and notes.
  */
 export default function CatScreen() {
   const theme = useTheme();
@@ -313,13 +313,14 @@ function SightingRow({ sighting, divider }: { sighting: Sighting; divider: boole
   );
 }
 
-/** A square thumbnail; tapping it offers to make it the cover or open the post it was shared in. */
+/** A square thumbnail; tapping it offers everything you can do with the photo. */
 function PhotoTile({ photo, cat, size }: { photo: Photo; cat: Cat; size: number }) {
   const theme = useTheme();
   const t = useT();
   const { openPost, tab } = useStackLinks();
   const isCover = cat.cover?.photo_id === photo.id;
   const postId = photo.post_id;
+  const [menuOpen, setMenuOpen] = useState(false);
 
   async function makeCover() {
     try {
@@ -329,53 +330,64 @@ function PhotoTile({ photo, cat, size }: { photo: Photo; cat: Cat; size: number 
     }
   }
 
-  const actions = [
-    ...(isCover ? [] : [{ label: t.cats.makeCover, run: makeCover }]),
-    postId ? { label: t.cats.viewPost, run: () => openPost(postId) } : { label: t.capture.share, run: () => router.push(sharePhotoHref(photo, tab)) },
-  ];
-
-  function openMenu() {
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        { options: [...actions.map((a) => a.label), t.common.cancel], cancelButtonIndex: actions.length },
-        (i) => actions[i]?.run(),
-      );
-      return;
+  async function remove() {
+    try {
+      await photosApi.delete(photo.id);
+      photoRemoved(photo);
+    } catch (e) {
+      Alert.alert(errorMessage(e));
     }
-    Alert.alert(
-      t.cats.photo,
-      undefined,
-      [{ text: t.common.cancel, style: 'cancel' }, ...actions.map((a) => ({ text: a.label, onPress: a.run }))],
-      { cancelable: true },
-    );
   }
 
+  function confirmRemove() {
+    confirmDestructive({
+      title: t.cats.deletePhotoTitle,
+      body: postId ? t.cats.deletePhotoBodyPosted : t.cats.deletePhotoBody,
+      action: t.feed.deleteAction,
+      cancel: t.common.cancel,
+      onConfirm: remove,
+    });
+  }
+
+  const actions: MenuAction[] = [
+    ...(isCover ? [] : [{ label: t.cats.makeCover, run: makeCover }]),
+    postId ? { label: t.cats.viewPost, run: () => openPost(postId) } : { label: t.capture.share, run: () => router.push(sharePhotoHref(photo, tab)) },
+    { label: t.capture.editDecoration, run: () => router.push(editPhotoHref(photo.id, cat.id)) },
+    { label: t.cats.deletePhoto, run: confirmRemove, destructive: true },
+  ];
+
   return (
-    <Pressable
-      accessibilityRole={actions.length ? 'button' : 'image'}
-      accessibilityLabel={isCover ? `${t.cats.photo}, ${t.cats.cover}` : t.cats.photo}
-      disabled={!actions.length}
-      onPress={openMenu}
-      style={({ pressed }) => [
-        styles.photo,
-        { width: size, height: size, backgroundColor: theme.backgroundElement },
-        pressed && styles.pressed,
-      ]}>
-      {photo.thumb_url ? (
-        <Image
-          source={{ uri: photo.thumb_url, cacheKey: `photo-thumb-${photo.id}` }}
-          style={StyleSheet.absoluteFill}
-          contentFit="cover"
-          transition={150}
-        />
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={isCover ? `${t.cats.photo}, ${t.cats.cover}` : t.cats.photo}
+        onPress={() => {
+          if (!showNativeActionMenu(actions, t.common.cancel)) setMenuOpen(true);
+        }}
+        style={({ pressed }) => [
+          styles.photo,
+          { width: size, height: size, backgroundColor: theme.backgroundElement },
+          pressed && styles.pressed,
+        ]}>
+        {photo.thumb_url ? (
+          <Image
+            source={{ uri: photo.thumb_url, cacheKey: `photo-thumb-${photo.id}` }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            transition={150}
+          />
+        ) : null}
+        <StickerLayer stickers={photo.decoration?.stickers} photoRatio={photo.width / photo.height || 1} />
+        {isCover ? (
+          <View style={styles.coverBadge}>
+            <SymbolView name={{ ios: 'star.fill', android: 'star', web: 'star' }} size={12} tintColor="#ffffff" />
+          </View>
+        ) : null}
+      </Pressable>
+      {menuOpen ? (
+        <ActionMenu title={t.cats.photo} actions={actions} cancel={t.common.cancel} onClose={() => setMenuOpen(false)} />
       ) : null}
-      <StickerLayer stickers={photo.decoration?.stickers} photoRatio={photo.width / photo.height || 1} />
-      {isCover ? (
-        <View style={styles.coverBadge}>
-          <SymbolView name={{ ios: 'star.fill', android: 'star', web: 'star' }} size={12} tintColor="#ffffff" />
-        </View>
-      ) : null}
-    </Pressable>
+    </>
   );
 }
 

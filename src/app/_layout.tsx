@@ -58,6 +58,16 @@ function RootNavigator() {
         />
         <Stack.Screen name="share-pick" options={{ headerShown: true, title: t.share.pickTitle, presentation: 'modal' }} />
         <Stack.Screen name="share-photo" options={{ headerShown: true, title: t.share.title, presentation: 'modal' }} />
+        <Stack.Screen name="edit-photo" options={{ headerShown: true, title: t.capture.editDecoration }} />
+        <Stack.Screen
+          name="edit-post"
+          options={{
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.85],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 24,
+          }}
+        />
         <Stack.Screen
           name="edit-cat"
           options={{
