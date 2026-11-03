@@ -44,5 +44,6 @@ const CARD = 156;
 
 const styles = StyleSheet.create({
   row: { gap: Spacing.three, paddingTop: Spacing.three, paddingBottom: Spacing.three },
-  card: { flex: 0, width: CARD, maxWidth: CARD, paddingHorizontal: 0 },
+  // The basis because on web `flex: 0` means a basis of 0, which would ignore the width.
+  card: { flex: 0, flexBasis: CARD, width: CARD, maxWidth: CARD, paddingHorizontal: 0 },
 });
