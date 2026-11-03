@@ -1,5 +1,8 @@
 import { useSyncExternalStore } from 'react';
 
+import type { CropState } from '@/features/photo-edit/crop';
+import type { PhotoDecoration } from '@/lib/api/types';
+
 // The photo being captured, shared by the capture screens (pick → review → map picker).
 // It lives in memory only: a capture abandoned when the app is killed is simply lost.
 
@@ -19,6 +22,10 @@ export type CaptureDraft = {
   location: DraftLocation | null;
   /** RFC 3339 from EXIF; the server uses "now" when absent. */
   takenAt: string | null;
+  /** The photo before cropping, set once it has been through the editor. */
+  source?: { uri: string; width: number; height: number };
+  crop?: CropState;
+  decoration?: PhotoDecoration;
 };
 
 let draft: CaptureDraft | null = null;

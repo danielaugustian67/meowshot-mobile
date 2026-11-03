@@ -2,6 +2,8 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
 
+import { changesPhoto, cropRect, type CropState } from '@/features/photo-edit/crop';
+
 import type { DraftLocation } from './draft';
 
 const MAX_EDGE = 1600; // matches the server's display size; anything larger is thrown away there
@@ -15,6 +17,17 @@ export async function compressPhoto(uri: string, width: number, height: number) 
   if (Math.max(width, height) > MAX_EDGE) {
     ctx.resize(width >= height ? { width: MAX_EDGE, height: null } : { width: null, height: MAX_EDGE });
   }
+  const image = await ctx.renderAsync();
+  const result = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.8 });
+  return { uri: result.uri, width: result.width, height: result.height };
+}
+
+/** Applies the editor's quarter turns and crop. A photo that would come out the same is handed straight back. */
+export async function cropPhoto(photo: { uri: string; width: number; height: number }, crop: CropState) {
+  if (!changesPhoto(crop, photo.width, photo.height)) return photo;
+  const ctx = ImageManipulator.manipulate(photo.uri);
+  if (crop.turns % 4) ctx.rotate(crop.turns * 90);
+  ctx.crop(cropRect(crop, photo.width, photo.height));
   const image = await ctx.renderAsync();
   const result = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.8 });
   return { uri: result.uri, width: result.width, height: result.height };

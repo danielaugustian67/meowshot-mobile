@@ -50,6 +50,12 @@ export type Sighting = {
   seen_at: string;
 };
 
+/** Centre as fractions of the photo, size as a fraction of its width, rotation in degrees. */
+export type PhotoSticker = { id: string; x: number; y: number; scale: number; rotation: number };
+
+/** Drawn by the app around and over a photo. A missing paper or motif means the cat's own. */
+export type PhotoDecoration = { paper?: number; motif?: number; stickers?: PhotoSticker[] };
+
 export type Photo = {
   id: number;
   cat_id: number;
@@ -61,6 +67,7 @@ export type Photo = {
   caption: string;
   taken_at: string | null;
   created_at: string;
+  decoration?: PhotoDecoration | null;
 };
 
 export type Cat = {
@@ -131,6 +138,7 @@ export type Post = {
     width: number;
     height: number;
     caption: string;
+    decoration?: PhotoDecoration | null;
   }[];
   reaction_counts: Partial<Record<Reaction, number>>;
   my_reaction: Reaction | null;

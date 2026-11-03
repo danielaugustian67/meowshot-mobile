@@ -14,6 +14,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { CatOption } from '@/features/capture/cat-option';
 import { updateDraft, useCaptureDraft, type DraftLocation } from '@/features/capture/draft';
 import { currentLocation, placeName } from '@/features/capture/media';
+import { displayRatio, hasDecoration, motifOf, paperColor, serializeDecoration } from '@/features/photo-edit/decoration';
+import { PhotoPrint } from '@/features/photo-edit/photo-print';
 import { capture, catsApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import { useT, type Strings } from '@/lib/i18n';
@@ -90,6 +92,7 @@ export default function ReviewScreen() {
           seen_at: draft.takenAt ?? undefined,
           cat_id: chosen === 'new' ? undefined : chosen,
           name: chosen === 'new' ? name.trim() || undefined : undefined,
+          decoration: serializeDecoration(draft.decoration),
         },
       );
       queryClient.invalidateQueries({ queryKey: queryKeys.cats });
@@ -108,6 +111,7 @@ export default function ReviewScreen() {
           lat: res.sighting.lat ?? '',
           lng: res.sighting.lng ?? '',
           label: res.sighting.label ?? '',
+          decoration: serializeDecoration(res.photo.decoration) ?? '',
         },
       });
     } catch (e) {
@@ -126,12 +130,31 @@ export default function ReviewScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
         <PawPattern inScroll />
-        <Image
-          source={{ uri: draft.photo.uri }}
-          style={[styles.photo, { aspectRatio: draft.photo.width / draft.photo.height || 1 }]}
-          contentFit="cover"
-          accessibilityLabel={t.capture.photoAlt}
-        />
+        {hasDecoration(draft.decoration) ? (
+          <PhotoPrint
+            color={paperColor(draft.decoration, chosen === 'new' ? 0 : chosen)}
+            motif={motifOf(draft.decoration, chosen === 'new' ? 0 : chosen)}
+            ratio={displayRatio(draft.photo.width, draft.photo.height)}
+            photoRatio={draft.photo.width / draft.photo.height || 1}
+            stickers={draft.decoration?.stickers}
+            photo={
+              <Image
+                source={{ uri: draft.photo.uri }}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+                accessibilityLabel={t.capture.photoAlt}
+              />
+            }
+          />
+        ) : (
+          <Image
+            source={{ uri: draft.photo.uri }}
+            style={[styles.photo, { aspectRatio: draft.photo.width / draft.photo.height || 1 }]}
+            contentFit="cover"
+            accessibilityLabel={t.capture.photoAlt}
+          />
+        )}
+        <Button title={t.capture.editPhoto} variant="secondary" onPress={() => router.push('/capture/edit')} />
 
         <View style={styles.section}>
           <ThemedText type="smallBold">{t.capture.location}</ThemedText>

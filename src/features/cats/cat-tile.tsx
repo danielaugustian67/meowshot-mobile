@@ -23,6 +23,8 @@ const MOTIFS = [
   require('@/assets/images/motif-star.png'),
 ];
 
+export const MOTIF_COUNT = MOTIFS.length;
+
 /**
  * One cat in a collection, printed like a photobooth frame on the cat's patterned paper: cover, name and, for
  * your own cats, a stamp of when and where it was last seen. `style` replaces the half-row grid sizing, e.g. with a fixed width in a carousel.

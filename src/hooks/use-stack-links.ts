@@ -1,6 +1,7 @@
 import { router, useSegments } from 'expo-router';
 
 import type { Photo } from '@/lib/api/types';
+import { serializeDecoration } from '@/features/photo-edit/decoration';
 
 export type StackTab = 'profile' | 'cats' | 'feed';
 
@@ -23,6 +24,7 @@ export function sharePhotoHref(photo: Photo, tab: StackTab) {
       photoId: String(photo.id),
       photoUri: photo.url ?? photo.thumb_url ?? '',
       ratio: String(photo.width / photo.height),
+      decoration: serializeDecoration(photo.decoration) ?? '',
       tab,
     },
   };

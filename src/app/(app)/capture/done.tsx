@@ -24,6 +24,7 @@ export default function CaptureDoneScreen() {
     lat?: string;
     lng?: string;
     label?: string;
+    decoration?: string;
   }>();
   const t = useT();
 

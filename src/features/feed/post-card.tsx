@@ -5,8 +5,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Fonts, PaperInk, Pastels, Spacing } from '@/constants/theme';
-import { BoothMark, PaperMotif } from '@/features/cats/cat-tile';
 import { useModeration } from '@/features/moderation/actions';
+import { displayRatio, motifOf, paperColor } from '@/features/photo-edit/decoration';
+import { PhotoPrint } from '@/features/photo-edit/photo-print';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import type { Post } from '@/lib/api/types';
@@ -19,8 +20,7 @@ const AVATAR = 36;
 
 /**
  * One post in the feed, laid out like Instagram: who posted and where, the photo, reactions, then the caption.
- * The photo sits on the cat's patterned paper, the same as its print in the collection, with two ears on top and
- * the cat's name on a tag. Tapping the author opens their profile.
+ * The photo sits on its print: the cat's patterned paper unless the owner chose another, with the cat's name on a tag. Tapping the author opens their profile.
  */
 export function PostCard({
   post,
@@ -40,8 +40,8 @@ export function PostCard({
   const name = catName(post.cat.name);
   const place = post.location?.label;
   const frame = Pastels[post.cat.id % Pastels.length];
-  // Very tall or very wide photos are cropped, so one post never fills more than a screen.
-  const ratio = photo?.width && photo.height ? Math.min(Math.max(photo.width / photo.height, 0.8), 1.91) : 1;
+  const decoration = photo?.decoration;
+  const ratio = displayRatio(photo?.width, photo?.height);
 
   return (
     <View style={styles.post}>
@@ -92,42 +92,40 @@ export function PostCard({
         )}
       </View>
 
-      <View style={styles.print}>
-        {/* Drawn before the paper, which hides the lower half of each ear. */}
-        <Ear color={frame} style={styles.earLeft} />
-        <Ear color={frame} style={styles.earRight} />
-        <View style={[styles.paper, { backgroundColor: frame }]}>
-          <PaperMotif id={post.cat.id} />
-          {photo?.url ? (
+      <PhotoPrint
+        color={paperColor(decoration, post.cat.id)}
+        motif={motifOf(decoration, post.cat.id)}
+        ratio={ratio}
+        photoRatio={photo?.width && photo.height ? photo.width / photo.height : 1}
+        stickers={decoration?.stickers}
+        photo={
+          photo?.url ? (
             <Image
               // Signed URLs change on every fetch; cache by photo id so the image is not re-downloaded.
               source={{ uri: photo.url, cacheKey: `photo-${photo.id}` }}
               // The small thumbnail arrives first, so the card is not empty while the full photo loads.
               placeholder={photo.thumb_url ? { uri: photo.thumb_url, cacheKey: `photo-thumb-${photo.id}` } : undefined}
               placeholderContentFit="cover"
-              style={[styles.photo, { aspectRatio: ratio, backgroundColor: theme.backgroundElement }]}
+              style={StyleSheet.absoluteFill}
               contentFit="cover"
               transition={150}
               accessibilityLabel={t.feed.photoAlt(name)}
             />
-          ) : null}
-          <View style={styles.markRow}>
-            <BoothMark />
-          </View>
-          {/* The cat's page is the owner's alone, so only your own posts link to it. */}
-          <Pressable
-            accessibilityRole={post.is_owner ? 'link' : undefined}
-            accessibilityLabel={post.is_owner ? t.cats.open(name) : undefined}
-            disabled={!post.is_owner}
-            onPress={() => openCat(post.cat.id)}
-            style={styles.tag}>
-            <SymbolView name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} size={13} tintColor={frame} />
-            <ThemedText numberOfLines={1} style={styles.name}>
-              {name}
-            </ThemedText>
-          </Pressable>
-        </View>
-      </View>
+          ) : null
+        }>
+        {/* The cat's page is the owner's alone, so only your own posts link to it. */}
+        <Pressable
+          accessibilityRole={post.is_owner ? 'link' : undefined}
+          accessibilityLabel={post.is_owner ? t.cats.open(name) : undefined}
+          disabled={!post.is_owner}
+          onPress={() => openCat(post.cat.id)}
+          style={styles.tag}>
+          <SymbolView name={{ ios: 'pawprint.fill', android: 'pets', web: 'pets' }} size={13} tintColor={frame} />
+          <ThemedText numberOfLines={1} style={styles.name}>
+            {name}
+          </ThemedText>
+        </Pressable>
+      </PhotoPrint>
 
       <View style={styles.body}>
         <ReactionBar post={post} frame={frame} onComment={onComment ?? (() => openPost(post.id))} />
@@ -144,21 +142,6 @@ export function PostCard({
   );
 }
 
-/** A rounded square turned 45° so one corner points up, with a pale inner ear near the tip. */
-function Ear({ color, style }: { color: string; style: object }) {
-  return (
-    <View style={[styles.ear, { backgroundColor: color }, style]}>
-      <View style={styles.innerEar} />
-    </View>
-  );
-}
-
-const RADIUS = 24;
-const INSET = Spacing.three;
-const EAR = 56;
-// How far the ear tips stand above the paper.
-const EAR_RISE = 30;
-
 const styles = StyleSheet.create({
   post: { gap: Spacing.two },
   flex: { flex: 1 },
@@ -167,32 +150,6 @@ const styles = StyleSheet.create({
   // Like the ring around a story, in the cat's colour.
   ring: { padding: Spacing.half, borderWidth: 2, borderRadius: AVATAR },
   more: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
-  print: { paddingHorizontal: Spacing.one, paddingTop: EAR_RISE },
-  // Clips the motif, which has no idea this paper is rounder than a print.
-  paper: { borderRadius: RADIUS, borderCurve: 'continuous', padding: INSET, overflow: 'hidden' },
-  ear: {
-    position: 'absolute',
-    // The turned square's tip sits EAR * 0.707 above its centre; put the tip at the top of the print.
-    top: EAR * 0.707 - EAR / 2,
-    width: EAR,
-    height: EAR,
-    borderRadius: 11,
-    transform: [{ rotate: '45deg' }],
-  },
-  earLeft: { left: Spacing.one + 34 },
-  earRight: { right: Spacing.one + 34 },
-  innerEar: {
-    position: 'absolute',
-    top: 9,
-    left: 9,
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.6)',
-  },
-  photo: { width: '100%', borderRadius: RADIUS - INSET, borderCurve: 'continuous' },
-  // Leaves the tag room to hang over the bottom of the photo.
-  markRow: { alignSelf: 'flex-end', minHeight: Spacing.five, paddingRight: Spacing.one },
   // Stays white in both themes, like the paper it is stuck to.
   tag: {
     position: 'absolute',

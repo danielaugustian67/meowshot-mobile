@@ -11,6 +11,8 @@ import { Segmented } from '@/components/ui/segmented';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
 import { LocationPreview } from '@/features/capture/location-preview';
+import { displayRatio, hasDecoration, motifOf, paperColor, parseDecoration } from '@/features/photo-edit/decoration';
+import { PhotoPrint } from '@/features/photo-edit/photo-print';
 import { postHref, type StackTab } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import { postsApi } from '@/lib/api/endpoints';
@@ -32,6 +34,8 @@ type Params = {
   lat?: string;
   lng?: string;
   label?: string;
+  /** JSON, when the photo has a chosen frame or stickers. */
+  decoration?: string;
 };
 
 /** Turns the photo just saved to the collection into a post. Friends only unless public is chosen. */
@@ -42,6 +46,8 @@ export default function ShareScreen() {
   const [caption, setCaption] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('FRIENDS');
   const fromCollection = !p.sightingId;
+  const decoration = parseDecoration(p.decoration);
+  const catId = Number(p.catId);
   // Until the user picks one, follow the server's default: exact for public posts, approximate otherwise.
   const [picked, setPicked] = useState<LocPrecision | null>(null);
   // The server falls back to the cat's latest sighting, which may not be where this photo was taken: no point for it.
@@ -97,12 +103,30 @@ export default function ShareScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
         <PawPattern inScroll />
-        <Image
-          source={{ uri: p.photoUri }}
-          style={[styles.photo, { aspectRatio: Number(p.ratio) || 1 }]}
-          contentFit="cover"
-          accessibilityLabel={t.capture.photoAlt}
-        />
+        {hasDecoration(decoration) ? (
+          <PhotoPrint
+            color={paperColor(decoration, catId)}
+            motif={motifOf(decoration, catId)}
+            ratio={displayRatio(Number(p.ratio) || 1, 1)}
+            photoRatio={Number(p.ratio) || 1}
+            stickers={decoration?.stickers}
+            photo={
+              <Image
+                source={{ uri: p.photoUri }}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+                accessibilityLabel={t.capture.photoAlt}
+              />
+            }
+          />
+        ) : (
+          <Image
+            source={{ uri: p.photoUri }}
+            style={[styles.photo, { aspectRatio: Number(p.ratio) || 1 }]}
+            contentFit="cover"
+            accessibilityLabel={t.capture.photoAlt}
+          />
+        )}
 
         <TextField
           label={t.share.caption}

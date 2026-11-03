@@ -34,6 +34,7 @@ import { queryClient, queryKeys } from '@/lib/query';
 
 import { BoothMark, PaperMotif } from './cat-tile';
 import { catChanged, useCat, useCatPhotos, useCatSightings } from './queries';
+import { StickerLayer } from '@/features/photo-edit/sticker-layer';
 
 const COLUMNS = 3;
 const GAP = Spacing.one;
@@ -372,6 +373,7 @@ function PhotoTile({ photo, cat, size }: { photo: Photo; cat: Cat; size: number 
           transition={150}
         />
       ) : null}
+      <StickerLayer stickers={photo.decoration?.stickers} photoRatio={photo.width / photo.height || 1} />
       {isCover ? (
         <View style={styles.coverBadge}>
           <SymbolView name={{ ios: 'star.fill', android: 'star', web: 'star' }} size={12} tintColor="#ffffff" />

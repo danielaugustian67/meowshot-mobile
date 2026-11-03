@@ -137,7 +137,7 @@ export const sightingsApi = {
 /** Quick capture: one photo becomes a new unnamed cat (or goes to `cat_id`) plus a sighting. */
 export async function capture(
   file: UploadFile,
-  fields: LocationFields & { cat_id?: number; name?: string; notes?: string; caption?: string } = {},
+  fields: LocationFields & { cat_id?: number; name?: string; notes?: string; caption?: string; decoration?: string } = {},
 ) {
   return request<CaptureResponse>('/captures', { method: 'POST', form: await photoForm(file, fields) });
 }
