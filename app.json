@@ -2,7 +2,7 @@
   "expo": {
     "name": "Meowshot",
     "slug": "meowshot",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "meowshot",
@@ -115,6 +115,12 @@
         "projectId": "ab4af51f-38e9-4db6-a92b-9e5d299a1bf1"
       }
     },
-    "owner": "danielaugust67"
+    "owner": "danielaugust67",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ab4af51f-38e9-4db6-a92b-9e5d299a1bf1"
+    }
   }
 }

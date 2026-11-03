@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
-import { Redirect, router } from 'expo-router';
+import { Redirect, router, usePreventRemove } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FormError } from '@/components/form-screen';
@@ -31,13 +31,35 @@ export default function EditScreen() {
   const [tab, setTab] = useState<Tab>('crop');
   // Cropping always starts over from the first photo, so repeated crops never lose quality or detail.
   const source = draft?.source ?? draft?.photo;
-  const [crop, setCrop] = useState<CropState>(draft?.crop ?? INITIAL_CROP);
-  const [cropped, setCropped] = useState(() => ({ photo: draft?.photo, crop: draft?.crop ?? INITIAL_CROP }));
-  const [decoration, setDecoration] = useState<PhotoDecoration>(draft?.decoration ?? {});
+  const [opened] = useState<{ crop: CropState; decoration: PhotoDecoration }>(() => ({
+    crop: draft?.crop ?? INITIAL_CROP,
+    decoration: draft?.decoration ?? {},
+  }));
+  const [crop, setCrop] = useState(opened.crop);
+  const [cropped, setCropped] = useState(() => ({ photo: draft?.photo, crop: opened.crop }));
+  const [decoration, setDecoration] = useState(opened.decoration);
   const [selected, setSelected] = useState<number | null>(null);
   const [area, setArea] = useState({ width: 0, height: 0 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [leaving, setLeaving] = useState(false);
+  const changed = crop !== opened.crop || decoration !== opened.decoration;
+  const allowLeaving = usePreventRemove(changed && !leaving, ({ repeat }) => {
+    const leave = () => {
+      setLeaving(true);
+      repeat();
+    };
+    if (Platform.OS === 'web') {
+      // Alert does nothing on web, which would leave no way out of this screen.
+      if (window.confirm(t.capture.editDiscardTitle)) leave();
+      return;
+    }
+    Alert.alert(t.capture.editDiscardTitle, t.capture.editDiscardBody, [
+      { text: t.capture.editKeep, style: 'cancel' },
+      { text: t.capture.editDiscard, style: 'destructive', onPress: leave },
+    ]);
+  });
 
   if (!draft || !source || !cropped.photo) return <Redirect href="/capture" />;
   const photo = cropped.photo;
@@ -80,6 +102,8 @@ export default function EditScreen() {
     run(async () => {
       const next = await applyCrop();
       updateDraft({ photo: next, source, crop, decoration });
+      setLeaving(true);
+      allowLeaving();
       router.back();
     });
   }
