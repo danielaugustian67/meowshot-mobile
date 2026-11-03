@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions, type CameraType, type FlashMode } from 'expo-camera';
 import { Image } from 'expo-image';
-import { AssetField, getPermissionsAsync, MediaType, Query } from 'expo-media-library';
+import { getPermissionsAsync } from 'expo-media-library';
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { DraftLocation } from '@/features/capture/draft';
+import { libraryPhotos } from '@/features/capture/library';
 import { currentLocation, fixWithin } from '@/features/capture/media';
 import { pickFromSystemLibrary, startDraft } from '@/features/capture/prepare';
 import { hapticShutter } from '@/lib/haptics';
@@ -25,11 +26,7 @@ const CAMERA: SymbolViewProps['name'] = { ios: 'camera.fill', android: 'photo_ca
 /** Newest photo in the library for the gallery shortcut, or null when the app may not read it. */
 async function latestPhoto(): Promise<string | null> {
   if (Platform.OS === 'web' || !(await getPermissionsAsync()).granted) return null;
-  const [first] = await new Query()
-    .eq(AssetField.MEDIA_TYPE, MediaType.IMAGE)
-    .orderBy({ key: AssetField.CREATION_TIME, ascending: false })
-    .limit(1)
-    .exeForMetadata();
+  const [first] = await libraryPhotos(null, 0, 1);
   return first?.id ?? null;
 }
 

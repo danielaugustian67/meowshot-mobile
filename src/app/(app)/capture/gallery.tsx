@@ -2,10 +2,7 @@ import { Image } from 'expo-image';
 import {
   addListener,
   Asset,
-  AssetField,
-  MediaType,
   presentPermissionsPicker,
-  Query,
   usePermissions,
   type AssetMetadata,
 } from 'expo-media-library';
@@ -31,21 +28,14 @@ import { Button } from '@/components/ui/button';
 import { LeanList } from '@/constants/list';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { AlbumSheet } from '@/features/capture/album-sheet';
+import { libraryPhotos, type PhotoAlbum } from '@/features/capture/library';
 import { pickFromSystemLibrary, startDraft } from '@/features/capture/prepare';
 import { useT } from '@/lib/i18n';
 
 const COLUMNS = 4;
 const GAP = 2;
 const PAGE = 80;
-
-function recentPhotos(offset: number) {
-  return new Query()
-    .eq(AssetField.MEDIA_TYPE, MediaType.IMAGE)
-    .orderBy({ key: AssetField.CREATION_TIME, ascending: false })
-    .offset(offset)
-    .limit(PAGE)
-    .exeForMetadata();
-}
 
 export default function GalleryScreen() {
   const theme = useTheme();
@@ -54,10 +44,39 @@ export default function GalleryScreen() {
 
   if (!permission) return <View style={{ flex: 1, backgroundColor: theme.background }} />;
   if (!granted) return <GalleryPermission canAsk={permission.canAskAgain} onAllow={requestPermission} />;
-  return <PhotoGrid limited={permission.accessPrivileges === 'limited'} />;
+  return <Gallery limited={permission.accessPrivileges === 'limited'} />;
 }
 
-function PhotoGrid({ limited }: { limited: boolean }) {
+function Gallery({ limited }: { limited: boolean }) {
+  const [album, setAlbum] = useState<PhotoAlbum | null>(null);
+  const [choosing, setChoosing] = useState(false);
+  return (
+    <>
+      {/* A new grid per album, so the list, its scroll position and the preview all start over. */}
+      <PhotoGrid key={album?.id ?? 'all'} limited={limited} album={album} onChooseAlbum={() => setChoosing(true)} />
+      {choosing ? (
+        <AlbumSheet
+          currentId={album?.id ?? null}
+          onClose={() => setChoosing(false)}
+          onPick={(next) => {
+            setAlbum(next);
+            setChoosing(false);
+          }}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function PhotoGrid({
+  limited,
+  album,
+  onChooseAlbum,
+}: {
+  limited: boolean;
+  album: PhotoAlbum | null;
+  onChooseAlbum: () => void;
+}) {
   const theme = useTheme();
   const t = useT();
   const { width } = useWindowDimensions();
@@ -69,11 +88,12 @@ function PhotoGrid({ limited }: { limited: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const cell = (width - GAP * (COLUMNS - 1)) / COLUMNS;
+  const albumId = album?.id ?? null;
 
   useEffect(() => {
     let alive = true;
     const reload = () =>
-      recentPhotos(0).then((first) => {
+      libraryPhotos(albumId, 0, PAGE).then((first) => {
         if (!alive) return;
         setPhotos(first);
         setDone(first.length < PAGE);
@@ -86,11 +106,11 @@ function PhotoGrid({ limited }: { limited: boolean }) {
       alive = false;
       sub.remove();
     };
-  }, []);
+  }, [albumId]);
 
   async function loadMore() {
     if (done) return;
-    const next = await recentPhotos(photos.length);
+    const next = await libraryPhotos(albumId, photos.length, PAGE);
     setPhotos([...photos, ...next]);
     setDone(next.length < PAGE);
   }
@@ -141,6 +161,20 @@ function PhotoGrid({ limited }: { limited: boolean }) {
         {selected && <Image source={{ uri: selected.id }} style={StyleSheet.absoluteFill} contentFit="cover" />}
       </View>
       <FormError message={error} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t.capture.chooseAlbum}
+        onPress={onChooseAlbum}
+        style={[styles.album, { borderBottomColor: theme.border }]}>
+        <ThemedText type="smallBold" numberOfLines={1} style={styles.albumName}>
+          {album?.title ?? t.capture.allPhotos}
+        </ThemedText>
+        <SymbolView
+          name={{ ios: 'chevron.down', android: 'keyboard_arrow_down', web: 'keyboard_arrow_down' }}
+          size={18}
+          tintColor={theme.text}
+        />
+      </Pressable>
       {limited && (
         <Pressable
           accessibilityRole="button"
@@ -222,6 +256,15 @@ function GalleryPermission({ canAsk, onAllow }: { canAsk: boolean; onAllow: () =
 
 const styles = StyleSheet.create({
   preview: { width: '100%', overflow: 'hidden' },
+  album: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  albumName: { flexShrink: 1 },
   limited: {
     flexDirection: 'row',
     justifyContent: 'space-between',

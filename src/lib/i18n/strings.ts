@@ -218,6 +218,9 @@ const id = {
   capture: {
     cameraTitle: 'Kamera',
     galleryTitle: 'Galeri',
+    allPhotos: 'Semua foto',
+    chooseAlbum: 'Pilih album',
+    albumsFailed: 'Album tidak bisa dibuka. Coba lagi ya.',
     reviewTitle: 'Kenalan dulu 🐾',
     pickLocationTitle: 'Pilih lokasi',
     doneTitle: 'Hore! 🎉',
@@ -626,6 +629,9 @@ const en: Strings = {
   capture: {
     cameraTitle: 'Camera',
     galleryTitle: 'Gallery',
+    allPhotos: 'All photos',
+    chooseAlbum: 'Choose album',
+    albumsFailed: "Couldn't open your albums. Please try again.",
     reviewTitle: 'Say hi 🐾',
     pickLocationTitle: 'Pick location',
     doneTitle: 'Yay! 🎉',
