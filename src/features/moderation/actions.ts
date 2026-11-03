@@ -3,7 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useSyncExternalStore } from 'react';
 import { ActionSheetIOS, Alert, Platform } from 'react-native';
 
-import { blocksApi } from '@/lib/api/endpoints';
+import { adminApi, blocksApi } from '@/lib/api/endpoints';
 import { errorMessage } from '@/lib/api/errors';
 import type { Comment, Page, Post, ReportTarget } from '@/lib/api/types';
 import { useT } from '@/lib/i18n';
@@ -61,6 +61,21 @@ function refetchAfterBlock() {
     // The server deletes notifications between the two of you.
     queryClient.invalidateQueries({ queryKey: queryKeys.notificationsAll }),
   ]);
+}
+
+/**
+ * Takes a post an admin removed out of every list. Its own screen is left alone: refetching it would only flash a
+ * "not found" while `onDeleted` closes it.
+ */
+function dropPost(postId: number) {
+  queryClient.setQueriesData<InfiniteData<Page<Post>>>({ queryKey: queryKeys.postsAll }, (data) => {
+    if (!data?.pages) return data;
+    return { ...data, pages: data.pages.map((p) => ({ ...p, items: p.items.filter((x) => x.id !== postId) })) };
+  });
+  queryClient.invalidateQueries({ queryKey: queryKeys.postsAll, predicate: (q) => q.queryKey[1] !== 'detail' });
+  queryClient.invalidateQueries({ queryKey: queryKeys.users });
+  queryClient.invalidateQueries({ queryKey: queryKeys.cats });
+  queryClient.invalidateQueries({ queryKey: queryKeys.me });
 }
 
 /** Report and block, from a post, a comment or a profile. Blocking always asks first. */
@@ -131,5 +146,24 @@ export function useModeration() {
     );
   }
 
-  return { openMenu, confirmBlock, unblock };
+  function confirmAdminDelete(postId: number, author: Person, onDeleted?: () => void) {
+    Alert.alert(t.moderation.adminDeleteTitle, t.moderation.adminDeleteBody(author.username), [
+      { text: t.common.cancel, style: 'cancel' },
+      {
+        text: t.moderation.adminDeleteAction,
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await adminApi.deletePost(postId);
+            dropPost(postId);
+            onDeleted?.();
+          } catch (e) {
+            Alert.alert(errorMessage(e));
+          }
+        },
+      },
+    ]);
+  }
+
+  return { openMenu, confirmBlock, unblock, confirmAdminDelete };
 }

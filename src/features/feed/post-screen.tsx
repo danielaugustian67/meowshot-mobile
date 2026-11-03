@@ -1,5 +1,5 @@
 import { useQuery, type InfiniteData } from '@tanstack/react-query';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -75,7 +75,13 @@ export default function PostScreen() {
           <PawPattern inScroll />
           {post.data ? (
             <>
-              <PostCard post={post.data} onComment={() => input.current?.focus()} />
+              <PostCard
+                post={post.data}
+                onComment={() => input.current?.focus()}
+                onDeleted={() => {
+                  if (router.canGoBack()) router.back();
+                }}
+              />
               <CommentList post={post.data} />
             </>
           ) : post.isPending ? (

@@ -11,6 +11,7 @@ import { PhotoPrint } from '@/features/photo-edit/photo-print';
 import { useStackLinks } from '@/hooks/use-stack-links';
 import { useTheme } from '@/hooks/use-theme';
 import type { Post } from '@/lib/api/types';
+import { useMe } from '@/lib/auth/session';
 import { catName, daysAgo } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 
@@ -26,16 +27,20 @@ export function PostCard({
   post,
   linkAuthor = true,
   onComment,
+  onDeleted,
 }: {
   post: Post;
   linkAuthor?: boolean;
+  /** Called after an admin removes the post, for a screen that shows nothing else. */
+  onDeleted?: () => void;
   /** What the comment button does; by default it opens the post, where the comments are. */
   onComment?: () => void;
 }) {
   const theme = useTheme();
   const t = useT();
   const { openProfile, openPost, openCat } = useStackLinks();
-  const { openMenu } = useModeration();
+  const { openMenu, confirmAdminDelete } = useModeration();
+  const isAdmin = useMe().data?.role === 'admin';
   const photo = post.photos[0];
   const name = catName(post.cat.name);
   const place = post.location?.label;
@@ -76,6 +81,16 @@ export function PostCard({
           tintColor={theme.textSecondary}
           accessibilityLabel={post.visibility === 'PUBLIC' ? t.feed.public : t.feed.friends}
         />
+        {isAdmin ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.moderation.adminDeleteTitle}
+            onPress={() => confirmAdminDelete(post.id, post.author, onDeleted)}
+            hitSlop={8}
+            style={({ pressed }) => [styles.more, { opacity: pressed ? 0.5 : 1 }]}>
+            <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={18} tintColor={theme.textSecondary} />
+          </Pressable>
+        ) : null}
         {post.is_owner ? null : (
           <Pressable
             accessibilityRole="button"

@@ -128,6 +128,11 @@ export const photosApi = {
   delete: (id: number) => request<void>(`/photos/${id}`, { method: 'DELETE' }),
 };
 
+export const adminApi = {
+  /** Removes anyone's post and its photos. The server refuses everyone but admins. */
+  deletePost: (id: number) => request<void>(`/admin/posts/${id}`, { method: 'DELETE' }),
+};
+
 export const sightingsApi = {
   update: (id: number, body: { lat?: number; lng?: number; label?: string; seen_at?: string }) =>
     request<Sighting>(`/sightings/${id}`, { method: 'PATCH', body }),
