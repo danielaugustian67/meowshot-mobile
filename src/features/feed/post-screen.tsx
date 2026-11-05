@@ -63,6 +63,10 @@ export default function PostScreen() {
           contentInsetAdjustmentBehavior="automatic"
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
+          // The list gets shorter when the keyboard opens and when the box grows, which keeps the last comment in view.
+          onLayout={() => {
+            if (keyboardOpen) scroll.current?.scrollToEnd({ animated: true });
+          }}
           contentContainerStyle={styles.content}>
           <PawPattern inScroll />
           {post.data ? (
