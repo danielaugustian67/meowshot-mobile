@@ -56,7 +56,7 @@ export default function PostScreen() {
       <Stack.Screen options={{ title: t.user.posts }} />
       <KeyboardAvoidingView
         style={[styles.flex, { backgroundColor: theme.background }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
         keyboardVerticalOffset={top}>
         <ScrollView
           ref={scroll}
